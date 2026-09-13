@@ -4,6 +4,7 @@ import json
 import shutil
 import sqlite3
 import time
+from contextlib import closing
 from pathlib import Path
 
 from mobile_rag.retrieval import Retriever, digest, new_run_dir, write_json
@@ -93,7 +94,7 @@ def build_enhanced(index_dir: Path, output_root: Path) -> Path:
         for name in ("retrieval.sqlite", "index_manifest.json"):
             shutil.copyfile(index_dir / name, out / name)
         path = out / "passage.sqlite"
-        with sqlite3.connect(path) as db:
+        with closing(sqlite3.connect(path)) as db, db:
             db.execute(
                 "CREATE VIRTUAL TABLE units USING fts5(heading,body,chunk_id UNINDEXED,passage_id UNINDEXED,tokenize='unicode61')"
             )
@@ -110,7 +111,8 @@ def build_enhanced(index_dir: Path, output_root: Path) -> Path:
                     db.execute("INSERT INTO units VALUES (?,?,?,?)", (heading, passage["text"], chunk["chunk_id"], pid))
                     count += 1
             db.execute("INSERT INTO units(units) VALUES('integrity-check')")
-            assert db.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
+            if db.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
+                raise ValueError("Passage database integrity failed")
         write_json(
             out / "enhancement_manifest.json",
             {
@@ -127,6 +129,7 @@ def build_enhanced(index_dir: Path, output_root: Path) -> Path:
 
 class EnhancedRetriever(Retriever):
     def __init__(self, index_dir):
+        self.units = None
         manifest = json.loads((index_dir / "enhancement_manifest.json").read_text(encoding="utf-8"))
         if (
             manifest["settings"] != SETTINGS
@@ -136,10 +139,20 @@ class EnhancedRetriever(Retriever):
         ):
             raise ValueError("Enhancement integrity mismatch")
         super().__init__(index_dir)
-        self.units = sqlite3.connect((index_dir / "passage.sqlite").resolve().as_uri() + "?mode=ro", uri=True)
+        try:
+            self.units = sqlite3.connect((index_dir / "passage.sqlite").resolve().as_uri() + "?mode=ro", uri=True)
+            # Attach the existing read-only base so filtering precedes LIMIT,
+            # without changing the persisted passage schema or rebuilding it.
+            base_uri = (index_dir / "retrieval.sqlite").resolve().as_uri() + "?mode=ro"
+            self.units.execute("ATTACH DATABASE ? AS source", (base_uri,))
+        except Exception:
+            self.close()
+            raise
 
     def close(self):
-        self.units.close()
+        if self.units is not None:
+            self.units.close()
+            self.units = None
         super().close()
 
     def search(self, question, top_k=5, mode="OR", document_id=None, disabled=()):
@@ -192,14 +205,14 @@ class EnhancedRetriever(Retriever):
         matched_passages = {}
         if "passages" not in disabled:
             # Bounded candidate pool; repeated passages do not multiply a parent's vote.
-            rows = self.units.execute(
-                "SELECT chunk_id,passage_id,bm25(units,3.0,1.0) score FROM units WHERE units MATCH ? ORDER BY score,chunk_id,passage_id LIMIT 160",
-                (focused_query,),
-            )
+            sql = "SELECT chunk_id,passage_id,bm25(units,3.0,1.0) score FROM units WHERE units MATCH ?"
+            args = [focused_query]
+            if document_id is not None:
+                sql += " AND chunk_id IN (SELECT id FROM source.chunks WHERE document_id=?)"
+                args.append(document_id)
+            rows = self.units.execute(sql + " ORDER BY score,chunk_id,passage_id LIMIT 160", args)
             ids = []
             for cid, pid, _ in rows:
-                if document_id is not None and self.resolve(cid)["chunk"]["document_id"] != document_id:
-                    continue
                 if cid not in matched_passages and len(ids) < 40:
                     ids.append(cid)
                     matched_passages[cid] = pid

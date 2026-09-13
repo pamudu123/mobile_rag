@@ -136,14 +136,14 @@ def test_contexts_and_results_saved_as_combined_json(tmp_path):
     contexts_by_key = {}
     compact_first = write_record_context(tmp_path, first, contexts_by_key)
     compact_second = write_record_context(tmp_path, second, contexts_by_key)
-    bundle = json.loads((tmp_path / CONTEXTS_FILENAME).read_text(encoding="utf-8"))
+    context_bundle = json.loads((tmp_path / CONTEXTS_FILENAME).read_text(encoding="utf-8"))
     results_path = write_results(tmp_path, [compact_first, compact_second])
     results = json.loads(results_path.read_text(encoding="utf-8"))
 
-    assert bundle["schema"] == "bulk-answer-contexts/v1"
-    assert set(bundle["contexts"]) == {"Q_S1:1", "Q_S1:2"}
-    assert bundle["contexts"]["Q_S1:1"]["context_text"] == first["context"]["context_text"]
-    assert bundle["contexts"]["Q_S1:2"]["evidence_groups"][0]["source_passages"][0]["text"] == "sick infant"
+    assert context_bundle["schema"] == "bulk-answer-contexts/v1"
+    assert set(context_bundle["contexts"]) == {"Q_S1:1", "Q_S1:2"}
+    assert context_bundle["contexts"]["Q_S1:1"]["context_text"] == first["context"]["context_text"]
+    assert context_bundle["contexts"]["Q_S1:2"]["evidence_groups"][0]["source_passages"][0]["text"] == "sick infant"
     assert compact_first["context_path"] == CONTEXTS_FILENAME
     assert "context_text" not in compact_first["context"]
     assert load_contexts(tmp_path)["Q_S1:2"]["context_text"] == second["context"]["context_text"]

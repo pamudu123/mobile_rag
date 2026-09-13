@@ -103,3 +103,13 @@ def test_saved_embeddings_are_reused_on_reopen(hybrid_bundle):
     for _ in range(2):
         with HybridRetriever(path, RetrievalConfig(False, True), encoder=QueryOnlyEncoder()) as r:
             assert r.search("semanticmissingword")["hits"]
+
+
+@pytest.mark.parametrize("config", [RetrievalConfig(), RetrievalConfig(False, True), RetrievalConfig(True, False)])
+def test_invalid_queries_never_reach_encoder(hybrid_bundle, config):
+    _, path, encoder = hybrid_bundle
+    with HybridRetriever(path, config, encoder=encoder) as retriever:
+        encoder.encode = lambda *args, **kwargs: pytest.fail("Invalid input reached dense encoder")
+        for query in ("what should i", " ".join(f"term{i}" for i in range(65)), "!!!"):
+            result = retriever.search(query)
+            assert result["status"] == "invalid_query" and not result["hits"]

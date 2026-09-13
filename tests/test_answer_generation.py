@@ -81,7 +81,8 @@ def test_success_abstention_and_response_rejection(package):
     assert call({"choices": []})["status"] == "invalid_response"
 
 
-def test_http_failures_not_retried_or_exposed(package):
+def test_http_failures_bounded_and_not_exposed(package, monkeypatch):
+    monkeypatch.setattr("mobile_rag.answer_generation.time.sleep", lambda _: None)
     calls = []
 
     def failure(*args):
@@ -90,5 +91,39 @@ def test_http_failures_not_retried_or_exposed(package):
 
     result = generate_answer(package, api_key="secret-key", live=True, transport=failure)
     assert result["status"] == "api_error" and result["http_status"] == 429
-    assert calls == [1]
+    assert calls == [1, 1, 1]
+    assert len(result["attempts"]) == 3
     assert "secret-key" not in json.dumps(result) and "sensitive body" not in json.dumps(result)
+
+
+def test_transient_recovery_and_terminal_errors(package, monkeypatch):
+    monkeypatch.setattr("mobile_rag.answer_generation.time.sleep", lambda _: None)
+    calls = []
+
+    def recover(*_):
+        calls.append(1)
+        if len(calls) == 1:
+            raise urllib.error.HTTPError("url", 503, "private", {}, None)
+        return response()
+
+    result = generate_answer(package, live=True, api_key="fixture", transport=recover)
+    assert result["status"] == "answered" and len(result["attempts"]) == 2
+
+    def terminal(*_):
+        raise urllib.error.HTTPError("url", 400, "private", {}, None)
+
+    result = generate_answer(package, live=True, api_key="fixture", transport=terminal)
+    assert result["status"] == "api_error" and len(result["attempts"]) == 1
+
+
+def test_configured_model_and_request_budget(package):
+    config = GenerationConfig(model="test/model", temperature=0.3)
+    request = make_request(package, config)
+    assert request["model"] == "test/model" and request["temperature"] == 0.3
+    payload = {**response(), "model": "test/model"}
+    assert generate_answer(package, config=config, live=True, api_key="fixture",
+                           transport=lambda *_: payload)["status"] == "answered"
+    tiny = deepcopy(package)
+    tiny["budget"]["total_chars"] = 10
+    result = generate_answer(tiny, live=True, api_key="fixture", transport=lambda *_: pytest.fail("Must not call"))
+    assert result["status"] == "request_budget_exceeded" and not result["live_request_sent"]

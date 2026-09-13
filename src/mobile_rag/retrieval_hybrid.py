@@ -12,8 +12,17 @@ from pathlib import Path
 
 import numpy as np
 
-from mobile_rag.retrieval import CONFIG, Retriever, digest, new_run_dir, write_json
-from mobile_rag.retrieval_enhanced import EnhancedRetriever, fuse
+from mobile_rag.retrieval import (
+    CONFIG,
+    Retriever,
+    artifact_order,
+    digest,
+    latest_bundle,
+    load_bundle,
+    new_run_dir,
+    write_json,
+)
+from mobile_rag.retrieval_enhanced import EnhancedRetriever, clean_question, fuse
 
 MODEL = "BAAI/bge-small-en-v1.5"
 REVISION = "5c38ec7c405ec4b44b94cc5a9bb96e735b38267a"
@@ -174,18 +183,35 @@ def latest_index(root, config=None):
     config = config or RetrievalConfig()
     config.validate()
     pattern = "*/dense_manifest.json" if config.enable_embeddings else "*/enhancement_manifest.json"
-    found = sorted((Path(root) / "artifacts/03_retrieval_enhanced").glob(pattern))
-    if not found:
-        raise ValueError("No compatible index. Build the BGE index with python -m mobile_rag.retrieval_hybrid first.")
-    return found[-1].parent
+    source = load_bundle(latest_bundle(Path(root)))["manifest"]["run"]["bundle_fingerprint"]
+    found = sorted((Path(root) / "artifacts/03_retrieval_enhanced").glob(pattern), key=artifact_order, reverse=True)
+    for path in found:
+        try:
+            # Validate assets without loading/downloading the query encoder.
+            with EnhancedRetriever(path.parent) as retriever:
+                if retriever.metadata["bundle_identity"] != source:
+                    continue
+                if config.enable_embeddings:
+                    manifest, _, _ = _load_dense(
+                        str(path.parent.resolve()), digest(path), digest(path.parent / "vectors.npy"),
+                        digest(path.parent / "embedding_units.json"),
+                    )
+                    if (manifest["bundle_identity"] != source
+                            or manifest["index_identity"] != retriever.metadata["index_identity"]
+                            or manifest["retrieval_sha256"] != digest(path.parent / "retrieval.sqlite")):
+                        continue
+            return path.parent
+        except (ValueError, KeyError, OSError):
+            continue
+    raise ValueError("No compatible index matches current chunks; rebuild the requested retrieval index")
 
 
 class HybridRetriever(Retriever):
     def __init__(self, index_dir, config=None, *, encoder=None):
         self.config = config or RetrievalConfig()
         self.config.validate()
-        super().__init__(Path(index_dir))
         self.lexical = None
+        super().__init__(Path(index_dir))
         try:
             if self.config.enable_bm25:
                 self.lexical = EnhancedRetriever(Path(index_dir))
@@ -211,6 +237,7 @@ class HybridRetriever(Retriever):
     def close(self):
         if self.lexical is not None:
             self.lexical.close()
+            self.lexical = None
         super().close()
 
     def search(self, question, top_k=5, mode="OR", document_id=None):
@@ -219,7 +246,9 @@ class HybridRetriever(Retriever):
             "question": question, "mode": mode, "terms": [], "compiled_query": None,
             "index_identity": self.metadata["index_identity"], "bundle_identity": self.metadata["bundle_identity"],
             "retrieval_variant": "hybrid_bge/v1", "retrieval_config": asdict(self.config),
-            "query_id": hashlib.sha256(json.dumps([question, top_k, mode, document_id, asdict(self.config)]).encode()).hexdigest()[:20],
+            "query_id": hashlib.sha256(json.dumps(
+                [question, top_k, mode, document_id, asdict(self.config)], sort_keys=True,
+            ).encode()).hexdigest()[:20],
             "status": "invalid_query", "hits": [], "branches": {}, "branch_queries": {},
         }
         if (not isinstance(question, str) or not question.strip() or len(question) > CONFIG["max_chars"]
@@ -227,15 +256,19 @@ class HybridRetriever(Retriever):
             return {**result, "reason": "invalid_input"}
         if document_id is not None and not self.db.execute("SELECT 1 FROM documents WHERE id=?", (document_id,)).fetchone():
             return {**result, "reason": "unknown_document"}
-        if not self._terms(question):
-            return {**result, "reason": "no_terms"}
+        terms = self._terms(question)
+        result["terms"] = terms
+        if not terms or len(terms) > CONFIG["max_terms"]:
+            return {**result, "reason": "no_terms_or_too_many_terms"}
+        if not clean_question(terms):
+            return {**result, "reason": "no_clinical_terms"}
         paths, timings, dense_scores = {}, {}, {}
         limit = max(top_k, self.config.candidate_limit)
         if self.lexical is not None:
             t = time.perf_counter()
             lexical = self.lexical.search(question, limit, mode, document_id)
-            if lexical["status"] == "error":
-                return {**result, "status": "error", "reason": lexical.get("reason")}
+            if lexical["status"] in {"error", "invalid_query"}:
+                return {**result, "status": lexical["status"], "reason": lexical.get("reason")}
             paths["bm25"] = [h["chunk"]["chunk_id"] for h in lexical["hits"]]
             timings["bm25"] = time.perf_counter() - t
             result["lexical_diagnostics"] = {k: lexical.get(k) for k in ("status", "focused_terms", "branch_queries")}
@@ -243,7 +276,10 @@ class HybridRetriever(Retriever):
             result["compiled_query"] = lexical.get("compiled_query")
         if self.config.enable_embeddings:
             t = time.perf_counter()
-            vector = self.encoder.encode([question], query=True)[0]
+            try:
+                vector = self.encoder.encode([question], query=True)[0]
+            except ValueError:
+                return {**result, "status": "error", "reason": "query_embedding_failed"}
             scores = self.vectors @ vector
             # Search the entire dense corpus, independent of lexical matches.
             for unit, score in zip(self.dense_units, scores, strict=True):

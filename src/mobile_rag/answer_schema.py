@@ -23,6 +23,8 @@ class GroundedAnswer(BaseModel):
     @field_validator("citations")
     @classmethod
     def valid_citations(cls, labels: list[str], info: ValidationInfo) -> list[str]:
+        if len(labels) != len(set(labels)):
+            raise ValueError("Citation labels must be unique")
         if any(not label.strip() for label in labels):
             raise ValueError("Citation labels must not be blank")
         if info.context is not None and any(label not in info.context["citation_map"] for label in labels):
@@ -45,4 +47,18 @@ def answer_json_schema(labels: list[str]) -> dict:
         raise ValueError("At least one nonblank citation label is required")
     schema = GroundedAnswer.model_json_schema()
     schema["properties"]["citations"]["items"]["enum"] = list(dict.fromkeys(labels))
+    schema["properties"]["citations"]["uniqueItems"] = True
+    schema["properties"]["reason"]["pattern"] = r"\S"
+    schema["anyOf"] = [
+        {"properties": {
+            "status": {"const": "answered"},
+            "answer": {"pattern": r"\S"},
+            "citations": {"minItems": 1},
+        }},
+        {"properties": {
+            "status": {"const": "insufficient_evidence"},
+            "answer": {"const": ""},
+            "citations": {"maxItems": 0},
+        }},
+    ]
     return schema

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import sqlite3
 import time
 from datetime import UTC, datetime
@@ -131,14 +132,49 @@ def load_bundle(folder: Path) -> dict[str, Any]:
     return {**data, "manifest": manifest, "maps": maps}
 
 
+def artifact_order(path: Path):
+    """Compare legacy ISO and compact UTC directory timestamps chronologically."""
+    name = path.parent.name
+    digits = re.sub(r"\D", "", name)[:14]
+    try:
+        timestamp = datetime.strptime(digits, "%Y%m%d%H%M%S").replace(tzinfo=UTC).timestamp()
+    except ValueError:
+        timestamp = path.stat().st_mtime
+    collision = re.search(r"_(\d+)$", name)
+    return timestamp, int(collision[1]) if collision else 1, name
+
+
+def bundle_matches_sources(data, root):
+    from mobile_rag.corpus import validate_inventory
+
+    manifest = data["manifest"]
+    inventory = json.loads((root / manifest["inventory_path"]).read_text(encoding="utf-8"))
+    if not validate_inventory(inventory)["passed"]:
+        return False
+    if inventory["run"]["input_fingerprint"] != manifest["inventory_fingerprint"]:
+        return False
+    files = [item for item in inventory["files"] if item["expected_location"]]
+    current = {
+        path.relative_to(root).as_posix()
+        for folder, extension in (("pdf_docs", ".pdf"), ("md_docs", ".md"))
+        for path in (root / "data" / folder).rglob("*") if path.is_file() and path.suffix.lower() == extension
+    }
+    return current == {item["relative_path"] for item in files} and all(
+        digest(root / item["relative_path"]) == item["sha256"] for item in files
+    )
+
+
 def latest_bundle(root: Path) -> Path:
-    for path in sorted((root / "artifacts/02_markdown_chunking").glob("*/run_manifest.json"), reverse=True):
+    root = Path(root).resolve()
+    paths = (root / "artifacts/02_markdown_chunking").glob("*/run_manifest.json")
+    for path in sorted(paths, key=artifact_order, reverse=True):
         try:
-            load_bundle(path.parent)
-            return path.parent
+            data = load_bundle(path.parent)
+            if bundle_matches_sources(data, root):
+                return path.parent
         except (ValueError, KeyError, OSError):
             continue
-    raise FileNotFoundError("No complete, validated Step 5 bundle")
+    raise FileNotFoundError("No validated chunk bundle matches current sources; rebuild inventory and chunks")
 
 
 def build_index(bundle_dir: Path, output_root: Path) -> Path:
@@ -277,18 +313,27 @@ class Retriever:
         path = index_dir / "retrieval.sqlite"
         if not manifest.get("passed") or digest(path) != manifest["database_sha256"]:
             raise ValueError("Index integrity mismatch")
-        self.db = sqlite3.connect(path.resolve().as_uri() + "?mode=ro", uri=True)
-        self.metadata = json.loads(self.db.execute("SELECT value FROM bundle_metadata").fetchone()[0])
-        if self.metadata["config"] != CONFIG or self.metadata["index_identity"] != manifest["index_identity"]:
-            self.db.close()
-            raise ValueError("Index version/identity mismatch")
-        self.scratch = sqlite3.connect(":memory:")
-        self.scratch.execute("CREATE VIRTUAL TABLE tokens USING fts5(text,tokenize='unicode61')")
-        self.scratch.execute("CREATE VIRTUAL TABLE vocab USING fts5vocab(tokens, 'instance')")
+        self.db = None
+        self.scratch = None
+        try:
+            self.db = sqlite3.connect(path.resolve().as_uri() + "?mode=ro", uri=True)
+            self.metadata = json.loads(self.db.execute("SELECT value FROM bundle_metadata").fetchone()[0])
+            if self.metadata["config"] != CONFIG or self.metadata["index_identity"] != manifest["index_identity"]:
+                raise ValueError("Index version/identity mismatch")
+            self.scratch = sqlite3.connect(":memory:")
+            self.scratch.execute("CREATE VIRTUAL TABLE tokens USING fts5(text,tokenize='unicode61')")
+            self.scratch.execute("CREATE VIRTUAL TABLE vocab USING fts5vocab(tokens, 'instance')")
+        except Exception:
+            # Call the base cleanup: a subclass may not have initialized yet.
+            Retriever.close(self)
+            raise
 
     def close(self) -> None:
-        self.scratch.close()
-        self.db.close()
+        for name in ("scratch", "db"):
+            connection = getattr(self, name, None)
+            if connection is not None:
+                connection.close()
+                setattr(self, name, None)
 
     def __enter__(self) -> Self:
         return self

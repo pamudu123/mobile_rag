@@ -267,7 +267,7 @@ def build_inventory(project_root: Path) -> dict[str, Any]:
             add_issue("markdown_pdf_pairing", "warning", [pairing["markdown_file_id"]], pairing["status"])
         elif used_content[pairing["pdf_content_id"]] > 1:
             add_issue("multiple_markdown_for_pdf", "warning", [pairing["markdown_file_id"]], pairing["pdf_content_id"])
-        else:
+        if pairing["status"] == "matched":
             ext = md_by_file[pairing["markdown_file_id"]]
             pdf_pages = page_counts[pairing["pdf_content_id"]]
             markers = ext["page_markers"]
@@ -302,7 +302,7 @@ def build_inventory(project_root: Path) -> dict[str, Any]:
             "python_version": sys.version.split()[0],
             "pymupdf_version": pymupdf.VersionBind,
             "input_fingerprint": input_fingerprint,
-            "technical_status": "passed",
+            "technical_status": "passed" if validate_inventory(stable_inventory)["passed"] else "failed",
             "clinical_review_status": "not_assessed",
             "transcription_accuracy": "not_assessed",
         },
@@ -348,12 +348,16 @@ def export_inventory(inventory: dict[str, Any], project_root: Path, *, output_ro
 
 def latest_inventory_manifest(project_root: Path) -> Path:
     """Return the newest Step 2 manifest whose exported checks passed."""
-    manifests = sorted((project_root / "artifacts" / "01_corpus_inventory").glob("*/corpus_manifest.json"))
+    from mobile_rag.retrieval import artifact_order
+
+    manifests = sorted((project_root / "artifacts" / "01_corpus_inventory").glob("*/corpus_manifest.json"),
+                       key=artifact_order)
     if not manifests:
         raise FileNotFoundError("No Step 2 corpus manifest found; execute the Step 2 notebook first")
     for manifest in reversed(manifests):
         checks_path = manifest.with_name("check_results.json")
-        if checks_path.exists() and json.loads(checks_path.read_text(encoding="utf-8")).get("passed"):
+        if (checks_path.exists() and json.loads(checks_path.read_text(encoding="utf-8")).get("passed")
+                and validate_inventory(json.loads(manifest.read_text(encoding="utf-8")))["passed"]):
             return manifest
     raise FileNotFoundError("No Step 2 corpus manifest with passing technical checks found")
 
@@ -361,7 +365,26 @@ def latest_inventory_manifest(project_root: Path) -> Path:
 def validate_inventory(inventory: dict[str, Any]) -> dict[str, Any]:
     file_ids = [item["file_id"] for item in inventory["files"]]
     known_files = set(file_ids)
+    files_by_id = {item["file_id"]: item for item in inventory["files"]}
+    pdf_ids = {item["content_id"] for item in inventory["pdf_contents"]}
+    paired_hashes: dict[str, set[str | None]] = defaultdict(set)
+    for pairing in inventory["pairings"]:
+        if pairing.get("status") == "matched":
+            file_rec = files_by_id.get(pairing["markdown_file_id"], {})
+            paired_hashes[pairing.get("pdf_content_id")].add(file_rec.get("sha256"))
     checks = {
+        "no_unusable_files": all(item.get("severity") != "error" for item in inventory.get("issues", [])),
+        "readable_pdfs": all(item["readable"] for item in inventory["pdf_contents"]),
+        "readable_markdown": all(item["decoding_status"] == "readable" for item in inventory["extractions"]),
+        "valid_markdown_structure": all(not item["structural_flags"] for item in inventory["extractions"]),
+        "valid_page_ranges": not any(
+            item["code"] == "page_marker_out_of_range" for item in inventory.get("issues", [])
+        ),
+        "unambiguous_pairings": all(item["status"] != "ambiguous" for item in inventory["pairings"]),
+        "unique_pdf_transcriptions": all(len(hashes) == 1 for hashes in paired_hashes.values()),
+        "pairing_pdf_references_valid": all(
+            item.get("pdf_content_id") in pdf_ids for item in inventory["pairings"] if item["status"] == "matched"
+        ),
         "unique_file_ids": len(file_ids) == len(set(file_ids)),
         "hashes_valid": all(
             item["sha256"] is None or re.fullmatch(r"[0-9a-f]{64}", item["sha256"]) for item in inventory["files"]
@@ -743,7 +766,9 @@ def validate_chunks(bundle: dict[str, Any], project_root: Path) -> dict[str, Any
     source_hashes_unchanged = all(
         sha256_file(root / item["markdown_path"]) == item["markdown_sha256"] for item in bundle["documents"]
     )
+    document_ids = [item["document_id"] for item in bundle["documents"]]
     checks = {
+        "unique_document_ids": len(document_ids) == len(set(document_ids)),
         "unique_passage_ids": len(passage_ids) == len(set(passage_ids)),
         "unique_chunk_ids": len(chunk_ids) == len(set(chunk_ids)),
         "source_slices_exact": slices_ok,
@@ -764,6 +789,10 @@ def validate_chunks(bundle: dict[str, Any], project_root: Path) -> dict[str, Any
 
 
 def export_chunks(bundle: dict[str, Any], project_root: Path, *, output_root: Path) -> Path:
+    checks = validate_chunks(bundle, project_root)
+    if not checks["passed"]:
+        failed = [name for name, passed in checks["checks"].items() if not passed]
+        raise ValueError("Chunk bundle failed validation: " + ", ".join(failed))
     output = _new_run_dir(output_root, bundle["run"]["created_at_utc"])
     _write_jsonl(output / "documents.jsonl", bundle["documents"])
     _write_jsonl(output / "passages.jsonl", bundle["passages"])
@@ -771,7 +800,6 @@ def export_chunks(bundle: dict[str, Any], project_root: Path, *, output_root: Pa
     _write_jsonl(output / "citation_targets.jsonl", bundle["citation_targets"])
     _write_json(output / "chunking_config.json", bundle["chunking_config"])
     _write_csv(output / "exceptions.csv", bundle["exceptions"])
-    checks = validate_chunks(bundle, project_root)
     _write_json(output / "check_results.json", checks)
     stats = chunk_statistics(bundle)
     manifest = {

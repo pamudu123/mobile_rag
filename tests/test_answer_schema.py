@@ -19,6 +19,7 @@ from mobile_rag.answer_schema import GroundedAnswer, answer_json_schema
         {"citations": [1]},
         {"citations": ["S2"]},
         {"citations": []},
+        {"citations": ["S1", "S1"]},
         {"claims": []},
         {"status": "categorical"},
         {"status": "insufficient_evidence"},

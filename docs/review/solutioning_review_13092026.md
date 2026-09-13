@@ -1,5 +1,7 @@
 # Architecture review validation and solutioning — 13 September 2026
 
+**Implementation update:** the review below describes the pre-fix snapshot. The subsequent authorized code changes and their verification are recorded in [Implementation results](#implementation-results-after-code-authorization) at the end of this document.
+
 The [architecture review](review_architecture_13092026.md) is substantially correct about missing relevance and answer-support checks. It also contains one invalid current-code claim, several overstated consequences, and proposed remedies that need evaluation before implementation. In particular, the bulk notebook already imports the hybrid symbols, duplicate chunk exports are rejected before database insertion, and the earlier Gemma results do not measure the current Qwen hybrid pipeline.
 
 This document validates the current working tree, including its pre-existing uncommitted changes. It is a review and proposed implementation plan only. No application code, notebooks, prompts, benchmark data, or retained experiment artifacts were changed. No live generation requests were made.
@@ -125,3 +127,54 @@ These are proposals for a later coding phase, not implemented changes or guarant
 - Do not infer that the two missing semantic checks explain **most** unsafe outputs from this review alone. Available evidence supports them as important risks; it also shows answer-intent errors, missing qualifiers, possible corpus limitations, and output truncation. Controlled retrieval, packing, and oracle-generation comparisons are needed to apportion causes.
 
 The review is a useful basis for work after these corrections. The immediate decision is to stabilize experiment identity and source validation, establish a measured quality baseline, then evaluate evidence and answer acceptance before changing retrieval heuristics broadly.
+
+## Implementation results after code authorization
+
+The confirmed bounded defects have now been addressed in code. The current context-sidecar exports and five-question notebook setting were preserved. Historical run artifacts were not rewritten, and no live generation request was made. This change does not claim clinical quality improvement from a new live benchmark.
+
+| Finding | Implemented behavior |
+|---|---|
+| Broken package entry point | `python -m mobile_rag` shows help; `build-dense` and offline `evaluate` are explicit subcommands. |
+| Notebook imports | Already correct; preserved. |
+| Generator mixing on resume | `GenerationConfig` includes model, temperature and retry policy. Requests and returned-model checks use the configured model. Loaded prompt text, schema and adapter identity are recorded, together with a runtime source fingerprint. Both run manifests and individual checkpoints are checked. Old manifests lacking identity are intentionally refused for continuation. |
+| Shared PDF transcription identity | Different Markdown contents paired to one PDF fail inventory validation. Exact-byte aliases remain accepted. Chunk validation checks unique document IDs; invalid chunk bundles are rejected before creating an export directory. |
+| Partial-constructor cleanup | Base and enhanced retrievers close their own partially opened connections. Close methods tolerate repeated calls. Hybrid closes successfully assigned children. Passage-index construction explicitly closes its SQLite connection. |
+| Invalid hybrid query propagation | Stopword-only, punctuation-only and over-64-distinct-term inputs are rejected before either retrieval path. Lexical invalid/error status propagates. Embedding validation failure has an explicit error result. Bulk records retain the retrieval failure stage instead of calling generation. |
+| Passage filtering | Passage SQL applies document membership before ranking/limiting its candidate pool, using a read-only attached base database. Existing stored passage indexes remain readable; per-row source resolution for filtering is removed. |
+| Schema mismatch | Provider schema now includes nonblank reason/answer constraints, unique citations, and answered/abstention consistency branches. Local duplicate citation rejection was added. Invalid responses retain a technical failure status rather than being relabeled as evidence abstention. Provider acceptance of these schema features still requires a live compatibility check; only local JSON Schema validation was performed. |
+| Corpus usability | Unreadable files/PDFs, decode failures, invalid Markdown/page structure, ambiguous pairings and conflicting transcriptions fail inventory checks. Technical status reflects those checks. Unmatched but readable Markdown remains an explicit supported mode with unavailable PDF mapping. |
+| Integrity assertion | Passage database integrity failure raises `ValueError`, including under `python -O`; FTS integrity checking remains enabled. |
+| Request budgeting | Default instruction reserve increased to 7,000 characters, including the bulk notebook. The entire serialized request plus answer reserve is checked before sending; excess returns `request_budget_exceeded`. This remains character accounting, not a provider-token guarantee. |
+| Transient HTTP failures | Default policy allows two retries for HTTP 429/5xx with bounded exponential delays. Attempt statuses and HTTP codes are retained without raw bodies. Terminal HTTP errors are not retried. Network/timeouts and error objects returned with successful HTTP responses are not automatically replayed. Saved terminal records remain terminal on resume. |
+| Status ambiguity | Local-context and model abstentions record `abstention_origin`; outer status and nested answer remain available. Generic worker exception text is omitted from persisted results. |
+| Artifact discovery and query IDs | Automatic selection checks current source hashes/file membership and current inventory validity, matches the chosen chunk bundle identity, and validates index assets. Legacy ISO and compact timestamp names sort chronologically. Explicit index paths still support historical reproduction. Hybrid query hashing sorts config keys. |
+| Installed prompt | Wheel includes the prompt and resolves it relative to the installed package outside a checkout. Environment-variable credentials remain supported; installed applications should use those or an explicitly supplied configuration root. |
+| Wrapped benchmark queries | `query_source="topic"` is available as an explicit ablation, while the original question still enters generation. The notebook defaults to `"question"`; both query text and query-source identity are recorded and protected on resume. No unmeasured ranking improvement is claimed. |
+| Missing offline evaluation | `mobile_rag.evaluation` reports statuses, cohorts, coverage, local/model abstention and Q_S2 unanswerable outcomes from saved records. Optional exhaustive `relevant_chunk_ids` annotations enable retrieval recall and packed precision/recall. Without annotations these metrics are null, not invented. Reference-answer string overlap is not treated as clinical correctness. |
+
+### Validation of the changes
+
+- **61 tests passed** (`.venv/Scripts/python.exe -m pytest -q`, 13.64 seconds in the recorded run), including constructor fault injection, candidate-pool starvation, invalid query suppression, changed/legacy resume identity, unusable corpus content, and optimized-Python integrity failure.
+- **Ruff passed** for `src` and `tests`.
+- Local JSON Schema validation rejected blank answers/reasons, duplicate citations, and inconsistent abstention, while accepting a consistent answer.
+- A wheel built with `uv build --wheel` successfully imported generation and loaded all 4,499 prompt characters after extraction into an isolated directory outside the checkout.
+- An in-memory copy of the bulk notebook executed in a fresh kernel with **two dry-run questions** and an explicit historical index. It produced checkpoints, context sidecar, results JSON/CSV and summary in a temporary directory. A second fresh kernel resumed without changing checkpoint bytes. User notebook live/count settings and historical artifacts were not altered for that validation.
+- Offline evaluation reproduced the old saved Gemma run's **100 answered** and Qwen hybrid run's **nine answered / one incomplete response**. These are technical record counts, not re-scored clinical judgments.
+
+The CLI-generated [hybrid saved-run evaluation](hybrid_saved_evaluation.json) is retained separately from the original experiment artifacts.
+
+Example offline evaluation (creates a separate report; does not call a model):
+
+```powershell
+.venv/Scripts/python.exe -m mobile_rag evaluate artifacts/05_2_bulk_answer_generation/20260913_142522 --output docs/review/hybrid_saved_evaluation.json
+```
+
+An optional `--annotations annotations.json` file maps record keys to objects such as `{"relevant_chunk_ids": ["chunk_..."]}`. These labels must refer to the exact evaluated index; they must enumerate the relevant chunks rather than merely one convenient match.
+
+### Current source issue and remaining work
+
+**Automatic discovery now correctly blocks the current corpus.** `data/md_docs/WHO-Oxygen-therapy-for-children-2016.md` contains duplicate declared page markers for pages 3–66 and out-of-order markers. This is reported by the existing parser and is now a failing usability check. Verify those references against the PDF, correct or regenerate the extraction, and rebuild inventory/chunks/indexes before treating an automatically selected run as current. Source text and page numbering were not guessed or silently edited. An explicit historical index remains readable for reproducing old results; it does not certify the current source inventory.
+
+The following remain open, rather than being disguised as small bug fixes: calibrated weak-evidence rejection; clinical claim entailment including numbers, units and negation; usefulness-based packing and semantic continuation links; header-aware table retrieval; numeric-aware tokenization; representative sampling policy; full provider token accounting/reasoning-budget tuning; normalized source edition/conflict policy; and a verified PDF viewer. Their proposed acceptance criteria remain in the earlier plan. The unused minimum-chunk-size setting remains advisory in practice. Per-question retriever construction and serialized encoder inference also remain; this change fixes connection lifetime, not throughput architecture.
+
+Consequently, `support_validation` remains `not_performed`. A structurally valid nonempty context can still be off-topic, and a schema-valid answer can still be unsupported. The changes make the experiment and failure reporting more reliable; they do not establish a clinical safety gate.

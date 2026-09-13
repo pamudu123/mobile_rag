@@ -9,7 +9,7 @@ from mobile_rag.retrieval import Retriever
 @dataclass(frozen=True)
 class ContextBudget:
     total_chars: int = 20000
-    instruction_reserve: int = 2000
+    instruction_reserve: int = 7000
     answer_reserve: int = 4000
 
     def allowance(self, question):

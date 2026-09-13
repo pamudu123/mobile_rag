@@ -7,12 +7,37 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from mobile_rag.answer_generation import GenerationConfig, generate_answer
+from mobile_rag.answer_generation import GenerationConfig, generate_answer, generation_identity
 from mobile_rag.context_preparation import ContextBudget, prepare_context
 from mobile_rag.retrieval_hybrid import HybridRetriever, RetrievalConfig
 
 CONTEXTS_FILENAME = "contexts.json"
 RESULTS_FILENAME = "results.json"
+RUNTIME_SHA256 = hashlib.sha256(b"".join(
+    path.name.encode() + path.read_bytes() for path in sorted(Path(__file__).parent.glob("*.py"))
+)).hexdigest()
+RESUME_KEYS = (
+    "retrieval_config", "dense_manifest_sha256", "dataset", "benchmark_sha256", "selected_question_count",
+    "number_of_questions", "index_dir", "retrieval_database_sha256", "passage_database_sha256",
+    "enhancement_manifest_sha256", "prompt_version", "prompt_sha256", "generation_config",
+    "generation_identity", "runtime_sha256", "query_source", "context_budget", "live",
+)
+
+
+def validate_resume(saved, current):
+    mismatches = [key for key in RESUME_KEYS if key not in saved or saved[key] != current.get(key)]
+    if mismatches:
+        raise ValueError("Resume configuration differs for: " + ", ".join(mismatches))
+
+
+def validate_checkpoint(record, run_config):
+    expected = {
+        "dataset": run_config["dataset"], "benchmark_sha256": run_config["benchmark_sha256"],
+        "generation_identity": run_config["generation_identity"], "runtime_sha256": run_config["runtime_sha256"],
+        "query_source": run_config["query_source"],
+    }
+    if any(record.get(key) != value for key, value in expected.items()):
+        raise ValueError("Checkpoint identity mismatch: " + str(record.get("record_key")))
 
 
 def benchmark_identity(path: Path) -> dict[str, Any]:
@@ -182,6 +207,7 @@ def process_question(
     generation_config: GenerationConfig,
     context_budget: ContextBudget,
     retrieval_config: RetrievalConfig | None = None,
+    query_source: str = "question",
 ) -> dict[str, Any]:
     """Run one isolated retrieval-to-generation pipeline without writing files."""
     started = datetime.now(UTC).isoformat()
@@ -192,6 +218,9 @@ def process_question(
         "dataset": dataset,
         "benchmark_sha256": benchmark_sha256,
         "question_record": dict(row),
+        "generation_identity": generation_identity(generation_config),
+        "runtime_sha256": RUNTIME_SHA256,
+        "query_source": query_source,
         "started_at_utc": started,
         "live_requested": live,
         "retrieval": None,
@@ -201,11 +230,22 @@ def process_question(
         "pipeline_status": "running",
     }
     try:
+        if query_source not in {"question", "topic"}:
+            raise ValueError("query_source must be question or topic")
+        query = row.get("topic") if query_source == "topic" else row["question"]
+        if not isinstance(query, str) or not query.strip():
+            raise ValueError("Selected retrieval query is missing or blank")
         with HybridRetriever(index_dir, retrieval_config) as retriever:
-            retrieval = retriever.search(row["question"])
+            retrieval = retriever.search(query)
+            retrieval["retrieval_query"] = query
+            retrieval["question"] = row["question"]
             expansion = retriever.expand(retrieval)
             context = prepare_context(retriever, retrieval, expansion, context_budget)
-        generation = generate_answer(context, config=generation_config, live=live)
+        if retrieval["status"] in {"invalid_query", "error"}:
+            generation = {"status": retrieval["status"], "answer": None, "live_request_sent": False,
+                          "reason": retrieval.get("reason"), "failure_stage": "retrieval"}
+        else:
+            generation = generate_answer(context, config=generation_config, live=live)
         record.update(
             retrieval=retrieval,
             context_expansion=expansion,
@@ -218,7 +258,7 @@ def process_question(
     except Exception as exc:  # noqa: BLE001 - retain a record for every unexpected worker failure.
         record.update(
             pipeline_status="worker_error",
-            error={"type": type(exc).__name__, "message": str(exc)[:1000]},
+            error={"type": type(exc).__name__, "message": "Worker failed; exception details omitted"},
         )
     record["completed_at_utc"] = datetime.now(UTC).isoformat()
     record["pipeline_seconds"] = time.perf_counter() - start
