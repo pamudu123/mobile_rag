@@ -40,7 +40,7 @@ INDEX_DIR = ROOT / "artifacts/03_retrieval_enhanced/20260913_154703"
 OUTPUT_ROOT = ROOT / "artifacts/05_2_bulk_answer_generation"
 RESUME_RUN_DIR = None
 
-NUMBER_OF_QUESTIONS = 5
+NUMBER_OF_QUESTIONS = None
 LIVE = True
 MAX_WORKERS = 4
 ENABLE_BM25 = True
