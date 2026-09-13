@@ -108,14 +108,14 @@ The future answer contract remains `answered`, `abstained`, or `error`, with cla
 | Path | Purpose |
 | --- | --- |
 | `notebooks/markdown_chunking/02_markdown_chunking.ipynb` | Executed notebook with saved examples and checks |
-| `artifacts/step-05/<run-id>/documents.jsonl` | Selected documents and source metadata |
-| `artifacts/step-05/<run-id>/passages.jsonl` | Exact source passages with offsets and structural context |
-| `artifacts/step-05/<run-id>/chunks.jsonl` | Retrieval-ready chunks, segment mappings, and links |
-| `artifacts/step-05/<run-id>/citation_targets.jsonl` | Source references for later answer citations |
-| `artifacts/step-05/<run-id>/chunking_config.json` | Reproducible settings and version |
-| `artifacts/step-05/<run-id>/exceptions.csv` | Oversized/opaque content, missing mappings, exclusions, and context warnings |
-| `artifacts/step-05/<run-id>/check_results.json` | Structural and preservation checks |
-| `artifacts/step-05/<run-id>/run_manifest.json` | Input/output provenance, counts, statistics, and readiness |
+| `artifacts/02_markdown_chunking/<run-id>/documents.jsonl` | Selected documents and source metadata |
+| `artifacts/02_markdown_chunking/<run-id>/passages.jsonl` | Exact source passages with offsets and structural context |
+| `artifacts/02_markdown_chunking/<run-id>/chunks.jsonl` | Retrieval-ready chunks, segment mappings, and links |
+| `artifacts/02_markdown_chunking/<run-id>/citation_targets.jsonl` | Source references for later answer citations |
+| `artifacts/02_markdown_chunking/<run-id>/chunking_config.json` | Reproducible settings and version |
+| `artifacts/02_markdown_chunking/<run-id>/exceptions.csv` | Oversized/opaque content, missing mappings, exclusions, and context warnings |
+| `artifacts/02_markdown_chunking/<run-id>/check_results.json` | Structural and preservation checks |
+| `artifacts/02_markdown_chunking/<run-id>/run_manifest.json` | Input/output provenance, counts, statistics, and readiness |
 | `docs/modeling/05-build-review.md` | What was built, representative chunks, actual statistics, limits, and next-step decision |
 
 These files are planned, not created by this document. Use new run directories and preserve previous artifacts. Check for existing user edits before writing notebook/review files. Leave source Markdown, PDFs, and Q&A unchanged.

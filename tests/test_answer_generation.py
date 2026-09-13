@@ -10,15 +10,6 @@ from mobile_rag.context_preparation import prepare_context
 from mobile_rag.retrieval import Retriever, build_index
 
 
-class FakeCounter:
-    def __init__(self):
-        self.metadata = {"method": "test_fixture_not_real_tokenizer"}
-
-    def count(self, messages):
-        assert messages[0]["role"] == "user"
-        return 100
-
-
 @pytest.fixture
 def package(bundle):  # noqa: F811
     root, folder = bundle
@@ -50,16 +41,16 @@ def response(citations=None, status="answered", reason="Supported by the fixture
     }
 
 
-def test_request_gates_and_context_integrity(package):
-    assert generate_answer(package)["status"] == "tokenizer_required"
-    dry = generate_answer(package, counter=FakeCounter())
+def test_request_gates_and_context_integrity(package, monkeypatch):
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    monkeypatch.setattr("mobile_rag.answer_generation.openrouter_api_key", lambda: None)
+    assert generate_answer(package, live=True)["status"] == "credentials_required"
+    dry = generate_answer(
+        package,
+    )
     assert dry["status"] == "dry_run" and not dry["live_request_sent"]
     assert dry["request"]["model"] == MODEL
     assert dry["request"]["provider"]["allow_fallbacks"] is False
-    assert (
-        generate_answer(package, counter=FakeCounter(), config=GenerationConfig(200, 100, 50))["status"]
-        == "budget_blocked"
-    )
     for status in ("empty", "budget_blocked", "invalid_evidence"):
         bad = {**package, "status": status}
         assert generate_answer(bad, live=True)["status"] in {"insufficient_evidence", "invalid_context"}
@@ -74,14 +65,12 @@ def test_request_gates_and_context_integrity(package):
 
 def test_success_abstention_and_response_rejection(package):
     def call(payload):
-        return generate_answer(
-            package, counter=FakeCounter(), live=True, api_key="test-only", transport=lambda *_: payload
-        )
+        return generate_answer(package, live=True, api_key="test-only", transport=lambda *_: payload)
 
     good = call(response())
     assert good["status"] == "answered" and good["citation_validation"] == "passed"
     assert good["support_validation"] == "not_performed"
-    assert good["token_budget"]["provider_minus_local_prompt_tokens"] == 5
+    assert good["usage"]["prompt_tokens"] == 105
     assert not good["live_request_sent"]
     assert call(response([], "insufficient_evidence", "Missing support"))["status"] == "insufficient_evidence"
     for labels in ([], ["S999"], [1]):
@@ -99,7 +88,7 @@ def test_http_failures_not_retried_or_exposed(package):
         calls.append(1)
         raise urllib.error.HTTPError("https://openrouter.ai", 429, "sensitive body", {}, None)
 
-    result = generate_answer(package, counter=FakeCounter(), api_key="secret-key", live=True, transport=failure)
+    result = generate_answer(package, api_key="secret-key", live=True, transport=failure)
     assert result["status"] == "api_error" and result["http_status"] == 429
     assert calls == [1]
     assert "secret-key" not in json.dumps(result) and "sensitive body" not in json.dumps(result)

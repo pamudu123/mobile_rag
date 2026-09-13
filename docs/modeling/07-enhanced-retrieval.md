@@ -15,7 +15,7 @@ Each chunk branch retrieves at most 40 candidates. Passage search examines at mo
 
 ## Execution and evidence
 
-Run `uv run python notebooks/retrieval/run_step.py`, or execute `notebooks/retrieval/03_retrieval.ipynb`. This single workflow builds a baseline from the latest validated Step 5 bundle, then packages a verified copy plus a separate passage database under `artifacts/step-07/<run>/`. A separate Step 6 notebook or existing index is unnecessary. Hashes bind both databases; query connections are read-only.
+Run `uv run python notebooks/retrieval/run_step.py --output-root artifacts/03_retrieval_enhanced --baseline-output-root artifacts/03_retrieval_baseline`, or execute `notebooks/retrieval/03_retrieval.ipynb`. This single workflow builds a baseline from the latest validated Step 5 bundle, then packages a verified copy plus a separate passage database under `artifacts/03_retrieval_enhanced/<run>/`. A separate Step 6 notebook or existing index is unnecessary. Hashes bind both databases; query connections are read-only.
 
 The runner compares all 200 existing Q_S1/Q_S2 question strings and four probes. It does not use answers for retrieval or claim clinical accuracy. Outputs include ranked-ID comparisons, desktop latency/size, sample branch ablations, and one full citation/context example. Changes in ranking are not evidence of improvement. No new annotation/preparation stage is introduced.
 
@@ -23,7 +23,7 @@ Before selecting this over Step 6, evaluate relevant evidence coverage and regre
 
 ## Recorded build evidence (2026-09-13)
 
-Fresh-kernel notebook execution completed. Ruff passed and all 9 tests passed. Artifact run: `artifacts/step-07/20260913T084506488345Z/`. Both database hashes remained unchanged during queries.
+Fresh-kernel notebook execution completed. Ruff passed and all 9 tests passed. Artifact run: `artifacts/03_retrieval_enhanced/20260913T084506488345Z/`. Both database hashes remained unchanged during queries.
 
 | Measure | Step 6 baseline | Enhanced experiment |
 | --- | ---: | ---: |

@@ -121,7 +121,7 @@ Accept the total input allowance and explicit reserves as configuration rather t
 | `notebooks/context_preparation/04_context_preparation.ipynb` | Inspect retrieval inputs, packing decisions and rendered evidence |
 | `notebooks/context_preparation/run_context_preparation.py` | Headless execution of the same workflow |
 | `notebooks/context_preparation/README.md` | Inputs, execution and limitations |
-| `artifacts/context-preparation/<run>/` | Saved configuration, packages, diagnostics and checks |
+| `artifacts/04_context_preparation/<run>/` | Saved configuration, packages, diagnostics and checks |
 
 These locations are implemented. Existing retrieval artifacts and the single purpose-based retrieval notebook are retained.
 
@@ -144,7 +144,7 @@ These locations are implemented. Existing retrieval artifacts and the single pur
 
 ## Completion checks
 
-- Verification on 2026-09-13: all 10 project tests passed; Ruff passed; the notebook executed in a fresh kernel with saved outputs. [Recorded run](../../artifacts/context-preparation/20260913T091159118667Z/summary.json) covers normal, overlapping, budget-blocked, empty and invalid evidence.
+- Verification on 2026-09-13: all 10 project tests passed; Ruff passed; the notebook executed in a fresh kernel with saved outputs. [Recorded run](../../artifacts/04_context_preparation/20260913T091159118667Z/summary.json) covers normal, overlapping, budget-blocked, empty and invalid evidence.
 - The normal example packed 7 groups into 6,927 rendered characters in approximately 4.96 ms on the desktop (one measurement, excluding retrieval/startup).
 - Both source database hashes remained unchanged.
 - Repeated packing produced identical packages.

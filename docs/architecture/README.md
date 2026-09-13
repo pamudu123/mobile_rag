@@ -46,7 +46,7 @@ flowchart LR
 - [Purpose-based notebooks](../../notebooks/README.md): runnable workflows and saved outputs.
 - [Modeling documentation](../modeling/README.md): detailed build specifications and measurements.
 - [Requirements](../user_requirement.md): source requirements.
-- Existing `artifacts/step-*` directories retain historical names so saved evidence remains traceable.
+- Artifact directories use ordered, purpose-based names matching the notebook workflow.
 
 ## How to use these documents
 

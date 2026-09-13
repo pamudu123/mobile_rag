@@ -17,8 +17,10 @@ def bundle(tmp_path):
     (md / "b.md").write_text(
         "# Shared\n\napple\n\n### Table\n\n| unit | value |\n| --- | --- |\n" + "| mg | 12 |\n" * 150, encoding="utf-8"
     )
-    inv = export_inventory(build_inventory(tmp_path), tmp_path)
-    output = export_chunks(build_chunks(tmp_path, inv / "corpus_manifest.json"), tmp_path)
+    inv = export_inventory(build_inventory(tmp_path), tmp_path, output_root=tmp_path / "inventory_exports")
+    output = export_chunks(
+        build_chunks(tmp_path, inv / "corpus_manifest.json"), tmp_path, output_root=tmp_path / "chunk_exports"
+    )
     return tmp_path, output
 
 
@@ -82,8 +84,10 @@ def test_unicode_jsonl_and_equal_score_ties(tmp_path):
     md.mkdir()
     for name, word in (("a", "red"), ("b", "tan")):
         (md / f"{name}.md").write_text(f"# Same\n\napple café\u2028{word}\n", encoding="utf-8")
-    inv = export_inventory(build_inventory(tmp_path), tmp_path)
-    folder = export_chunks(build_chunks(tmp_path, inv / "corpus_manifest.json"), tmp_path)
+    inv = export_inventory(build_inventory(tmp_path), tmp_path, output_root=tmp_path / "inventory_exports")
+    folder = export_chunks(
+        build_chunks(tmp_path, inv / "corpus_manifest.json"), tmp_path, output_root=tmp_path / "chunk_exports"
+    )
     out = build_index(folder, tmp_path / "indexes")
     with Retriever(out) as retriever:
         hits = retriever.search("café")["hits"]

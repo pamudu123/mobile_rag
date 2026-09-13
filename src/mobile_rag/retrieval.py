@@ -119,7 +119,7 @@ def load_bundle(folder: Path) -> dict[str, Any]:
 
 
 def latest_bundle(root: Path) -> Path:
-    for path in sorted((root / "artifacts/step-05").glob("*/run_manifest.json"), reverse=True):
+    for path in sorted((root / "artifacts/02_markdown_chunking").glob("*/run_manifest.json"), reverse=True):
         try:
             load_bundle(path.parent)
             return path.parent

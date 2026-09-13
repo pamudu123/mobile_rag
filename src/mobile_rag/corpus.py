@@ -324,13 +324,13 @@ def _write_csv(path: Path, values: list[dict[str, Any]]) -> None:
             )
 
 
-def export_inventory(inventory: dict[str, Any], project_root: Path) -> Path:
+def export_inventory(inventory: dict[str, Any], project_root: Path, *, output_root: Path) -> Path:
     run_id = (
         inventory["run"]["created_at_utc"].replace(":", "-").replace("+00:00", "Z")
         + "_"
         + inventory["run"]["input_fingerprint"][:10]
     )
-    output = project_root / "artifacts" / "step-02" / run_id
+    output = Path(output_root) / run_id
     output.mkdir(parents=True, exist_ok=False)
     _write_json(output / "corpus_manifest.json", inventory)
     _write_csv(output / "file_inventory.csv", inventory["files"])
@@ -342,7 +342,7 @@ def export_inventory(inventory: dict[str, Any], project_root: Path) -> Path:
 
 def latest_inventory_manifest(project_root: Path) -> Path:
     """Return the newest Step 2 manifest whose exported checks passed."""
-    manifests = sorted((project_root / "artifacts" / "step-02").glob("*/corpus_manifest.json"))
+    manifests = sorted((project_root / "artifacts" / "01_corpus_inventory").glob("*/corpus_manifest.json"))
     if not manifests:
         raise FileNotFoundError("No Step 2 corpus manifest found; execute the Step 2 notebook first")
     for manifest in reversed(manifests):
@@ -658,7 +658,11 @@ def build_chunks(project_root: Path, inventory_path: Path) -> dict[str, Any]:
             )
     content = {
         "schema": CHUNK_SCHEMA,
-        "inventory_path": inventory_path.relative_to(root).as_posix(),
+        "inventory_path": (
+            inventory_path.relative_to(root).as_posix()
+            if inventory_path.is_relative_to(root)
+            else inventory_path.resolve().as_posix()
+        ),
         "inventory_fingerprint": inventory["run"]["input_fingerprint"],
         "chunking_config": CHUNK_CONFIG,
         "documents": documents,
@@ -753,13 +757,13 @@ def validate_chunks(bundle: dict[str, Any], project_root: Path) -> dict[str, Any
     }
 
 
-def export_chunks(bundle: dict[str, Any], project_root: Path) -> Path:
+def export_chunks(bundle: dict[str, Any], project_root: Path, *, output_root: Path) -> Path:
     run_id = (
         bundle["run"]["created_at_utc"].replace(":", "-").replace("+00:00", "Z")
         + "_"
         + bundle["run"]["bundle_fingerprint"][:10]
     )
-    output = project_root / "artifacts" / "step-05" / run_id
+    output = Path(output_root) / run_id
     output.mkdir(parents=True, exist_ok=False)
     _write_jsonl(output / "documents.jsonl", bundle["documents"])
     _write_jsonl(output / "passages.jsonl", bundle["passages"])

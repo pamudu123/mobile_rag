@@ -7,7 +7,7 @@ Status: ready for user review. Executed: 2026-09-13.
 - [Step 2 notebook](../../notebooks/corpus_inventory/01_corpus_inventory.ipynb) with saved outputs.
 - [Step 2 folder guide](../../notebooks/corpus_inventory/README.md) and headless runner.
 - Reusable inventory implementation in `src/mobile_rag/corpus.py`.
-- Machine-readable evidence in [`artifacts/step-02/2026-09-13T07-57-37+00-00_d6d0852754/`](../../artifacts/step-02/2026-09-13T07-57-37+00-00_d6d0852754/).
+- Machine-readable evidence in [`artifacts/01_corpus_inventory/2026-09-13T07-57-37+00-00_d6d0852754/`](../../artifacts/01_corpus_inventory/2026-09-13T07-57-37+00-00_d6d0852754/).
 
 ## Results
 

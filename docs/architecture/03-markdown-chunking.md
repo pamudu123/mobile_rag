@@ -67,7 +67,7 @@ flowchart LR
 - Structural preservation does not prove that every clinical qualifier is captured.
 - Declared pages are unverified; exact PDF coordinates are unavailable.
 - No embeddings or model calls.
-- Existing artifact directories retain their historical `step-05` names.
+- Artifact directories use ordered, purpose-based names matching the notebook workflow.
 
 ## Open the implementation
 

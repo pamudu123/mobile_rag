@@ -1,24 +1,28 @@
 # Answer generation
 
-Pydantic models `GroundedAnswer` in `src/mobile_rag/answer_schema.py` define the output contract. The request preview shows their generated JSON Schema. Local validation rejects extra fields, incorrect types, blank answers or reasons, unknown citations and inconsistent abstention responses.
+Uses OpenRouter `google/gemma-3-4b-it`. No local tokenizer or model files are required.
 
-Prepare evidence-only requests for `google/gemma-3-4b-it` on OpenRouter. The default notebook run makes no inference request and saves a request preview and setup status.
-
-```powershell
-uv sync --extra generation
-uv run --extra generation python notebooks/answer_generation/run_answer_generation.py
-```
-
-For live use, set `OPENROUTER_API_KEY` in the process environment and `GEMMA_TOKENIZER_DIR` to a local copy of Google's `google/gemma-3-4b-it` tokenizer files, including its configuration and chat template. Obtain these through your authenticated Hugging Face account after accepting the model terms. Model weights are unnecessary. Keep credentials out of notebook cells and saved outputs. `.env` is not automatically loaded.
+- Set `OUTPUT_ROOT` in the notebook to choose where artifacts are saved.
+- `LIVE=False`: retrieve evidence, prepare context, validate the package and save a request preview; no API call or generated answer.
+- `LIVE=True`: requires `OPENROUTER_API_KEY` in the process environment and sends one request. Do not place secrets in notebook cells. Keys are read automatically from the process environment, then the project-root `.env`, then `src/mobile_rag/.env`. `.env.example` is a template and is never loaded. Explicit function keys take precedence. Files are read at request time, so no kernel restart is needed for `.env` edits.
+- Context preparation retains its character budget. `max_tokens` caps output at 1,024 by default. There is no local input-token count; provider context-limit errors return an API failure. Provider usage is retained when returned.
+- Pydantic validates `status`, `answer`, `reason`, and `citations`. Valid citation labels do not prove semantic support.
 
 ```powershell
-uv run --extra generation python notebooks/answer_generation/run_answer_generation.py --live --question "What should I remember about bubble CPAP?"
+uv run python notebooks/answer_generation/run_answer_generation.py --output-root artifacts/05_answer_generation
+uv run python notebooks/answer_generation/run_answer_generation.py --output-root artifacts/05_answer_generation --live
 ```
 
-Optional flags: `--index <enhanced-index-directory>` and `--tokenizer-dir <local-directory>`. Default index selection uses the latest enhanced retrieval package. The runner prepares fresh context from verified stored evidence.
+Optional inputs: `--question` and `--index`. Outputs in a fresh run directory: `context.json`, `request_preview.json` when ready, and `result.json`. No automatic retries or model fallback. See [architecture](../../docs/architecture/06-answer-generation.md).
 
-Artifacts under `artifacts/answer-generation/<run>/`: `context.json`, `request_preview.json` (when ready), and `result.json`. These contain question/source text; authorization headers are never saved. Each live run sends at most one inference request. No automatic retries, model fallback or full benchmark runs.
+## Bulk generation
 
-Local template token counts are not guaranteed to equal provider counts. The configurable default reserves 512 tokens for formatting differences and 1,024 for completion within a 32,768-token budget. Oversized prompts are blocked without cutting evidence. Provider usage is recorded for comparison when available.
+Use [05_2_bulk_answer_generation.ipynb](05_2_bulk_answer_generation.ipynb) to process a question JSON file with bounded parallelism. Its configuration cell exposes:
 
-Valid citation labels do not prove semantic support. See [architecture and verification](../../docs/architecture/06-answer-generation.md).
+- `QUESTION_PATH`: defaults to `data/questions/Q_S1.json`; change it for another compatible file.
+- `NUMBER_OF_QUESTIONS`: a positive integer runs the first N rows; `None` runs all rows.
+- `MAX_WORKERS`: number of parallel retrieval/generation workers.
+- `LIVE`: `False` saves dry-run records; `True` makes OpenRouter requests.
+- `OUTPUT_ROOT` and `RESUME_RUN_DIR`: new-run and explicit-resume locations.
+
+The notebook saves a run manifest, full checkpointed JSONL records, a compact CSV, and a summary. Full records retain the benchmark row, retrieval, context, citation map, generation response, usage, timings, and configuration identities. Reference answers are saved for later evaluation but are excluded from retrieval and model prompts. No automatic API retry is performed.

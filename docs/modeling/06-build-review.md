@@ -6,7 +6,7 @@ Status: implemented, executed, ready for review. Date: 2026-09-13.
 
 - [Executed notebook](../../notebooks/retrieval/03_retrieval.ipynb), [runner](../../notebooks/retrieval/run_step.py), and [folder guide](../../notebooks/retrieval/README.md).
 - [Shared retrieval module](../../src/mobile_rag/retrieval.py) and [focused tests](../../tests/test_retrieval.py).
-- [Validated run](../../artifacts/step-06/20260913T082112738141Z_1e502c96a8/) containing the SQLite database, input/output provenance, checks, complete example results, timing samples, and search summary.
+- [Validated run](../../artifacts/03_retrieval_baseline/20260913T082112738141Z_1e502c96a8/) containing the SQLite database, input/output provenance, checks, complete example results, timing samples, and search summary.
 
 The selected input is Step 5 bundle `9f352c688e71637f0478088b17cea2ac52cbf46f90abde4120f63a6198cfcf68`. Its artifact hashes and source relationships were checked before indexing. SQLite version: 3.53.1. No new dependencies were needed.
 

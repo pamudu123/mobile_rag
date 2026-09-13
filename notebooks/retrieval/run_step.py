@@ -1,5 +1,6 @@
 """Run lexical retrieval comparison without reading benchmark answers."""
 
+import argparse
 import json
 import statistics
 import sys
@@ -12,9 +13,9 @@ from mobile_rag.retrieval import Retriever, build_index, digest, latest_bundle, 
 from mobile_rag.retrieval_enhanced import EnhancedRetriever, build_enhanced
 
 
-def run(bundle: Path | None = None):
-    baseline = build_index(bundle or latest_bundle(ROOT), ROOT / "artifacts/step-06")
-    out = build_enhanced(baseline, ROOT / "artifacts/step-07")
+def run(bundle: Path | None = None, *, baseline_output_root: Path, output_root: Path):
+    baseline = build_index(bundle or latest_bundle(ROOT), baseline_output_root)
+    out = build_enhanced(baseline, output_root)
     queries = [
         "What should I remember about bubble CPAP?",
         "severe malnutrition",
@@ -66,4 +67,9 @@ def run(bundle: Path | None = None):
 
 
 if __name__ == "__main__":
-    run()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--bundle", type=Path)
+    parser.add_argument("--baseline-output-root", type=Path, required=True)
+    parser.add_argument("--output-root", type=Path, required=True)
+    args = parser.parse_args()
+    run(args.bundle, baseline_output_root=args.baseline_output_root, output_root=args.output_root)

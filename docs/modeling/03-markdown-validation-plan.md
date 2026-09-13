@@ -1,4 +1,4 @@
-﻿# Step 3: Existing Markdown validation and source mapping
+# Step 3: Existing Markdown validation and source mapping
 
 Status: documented proposal; implementation not started.
 
@@ -26,7 +26,7 @@ Automated flags are evidence to inspect, not proof of an OCR error. A successful
 | Input                                                      | Use                                                           |
 | ---------------------------------------------------------- | ------------------------------------------------------------- |
 | `data/md_docs/`                                            | Existing source text; read without modification               |
-| Selected `artifacts/step-02/<run-id>/corpus_manifest.json` | File identities, hashes, pairings, and known inventory issues |
+| Selected `artifacts/01_corpus_inventory/<run-id>/corpus_manifest.json` | File identities, hashes, pairings, and known inventory issues |
 | Matched originals from `data/pdf_docs/`                    | Visual/source-coordinate verification where available         |
 | Optional prior Step 3 review ledger                        | Resume reviews only when source hashes still match            |
 

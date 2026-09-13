@@ -1,4 +1,4 @@
-﻿# Step 2: Corpus inventory and lightweight Markdown checks
+# Step 2: Corpus inventory and lightweight Markdown checks
 
 Status: implemented and ready for review. See [the build review](02-build-review.md).
 
@@ -90,10 +90,10 @@ All paths below are future outputs, not artifacts created during this documentat
 | Path | Purpose |
 | --- | --- |
 | `notebooks/corpus_inventory/01_corpus_inventory.ipynb` | Runnable notebook with saved output tables |
-| `artifacts/step-02/<run-id>/corpus_manifest.json` | Complete versioned inventory, content identities, pairings, and review placeholders |
-| `artifacts/step-02/<run-id>/file_inventory.csv` | Flat inventory for inspection |
-| `artifacts/step-02/<run-id>/issues.csv` | File, matching, and structural problems |
-| `artifacts/step-02/<run-id>/check_results.json` | Technical validation outcomes and run consistency |
+| `artifacts/01_corpus_inventory/<run-id>/corpus_manifest.json` | Complete versioned inventory, content identities, pairings, and review placeholders |
+| `artifacts/01_corpus_inventory/<run-id>/file_inventory.csv` | Flat inventory for inspection |
+| `artifacts/01_corpus_inventory/<run-id>/issues.csv` | File, matching, and structural problems |
+| `artifacts/01_corpus_inventory/<run-id>/check_results.json` | Technical validation outcomes and run consistency |
 | `docs/modeling/02-build-review.md` | Actual findings, executed checks, artifact links, limitations, and next review decision |
 
 Use a new run directory instead of overwriting prior reports. Re-execution should produce equivalent substantive records for unchanged inputs, with separate run metadata. Inspect existing notebook/report files before writing so user edits are preserved. No changes to source data are necessary.

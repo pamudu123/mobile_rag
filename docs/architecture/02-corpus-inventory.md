@@ -48,7 +48,7 @@ flowchart LR
 - Records file identity and detects exact duplicates.
 - Checks for empty or unreadable files and uncertain source mappings.
 - Performs lightweight Markdown structure checks.
-- Saves reproducible artifacts under `artifacts/step-02/`.
+- Saves reproducible artifacts under `artifacts/01_corpus_inventory/`.
 
 ## Boundaries
 

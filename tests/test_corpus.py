@@ -54,7 +54,7 @@ def test_chunk_build_is_deterministic_and_keeps_table_atomic(tmp_path: Path) -> 
     )
     (tmp_path / "data/md_docs/Table.md").write_text(source, encoding="utf-8")
     inventory = build_inventory(tmp_path)
-    manifest = tmp_path / "artifacts/step-02/test/corpus_manifest.json"
+    manifest = tmp_path / "artifacts/01_corpus_inventory/test/corpus_manifest.json"
     manifest.parent.mkdir(parents=True)
     manifest.write_text(json.dumps(inventory), encoding="utf-8")
 

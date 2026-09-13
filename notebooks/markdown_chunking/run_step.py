@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import sys
 from pathlib import Path
 
@@ -16,15 +17,19 @@ from mobile_rag.corpus import (
 )
 
 
-def main() -> None:
-    inventory = latest_inventory_manifest(PROJECT_ROOT)
+def main(output_root: Path, inventory_path: Path | None = None) -> None:
+    inventory = inventory_path or latest_inventory_manifest(PROJECT_ROOT)
     bundle = build_chunks(PROJECT_ROOT, inventory)
     checks = validate_chunks(bundle, PROJECT_ROOT)
     if not checks["passed"]:
         raise RuntimeError(f"Chunk checks failed: {checks}")
-    output = export_chunks(bundle, PROJECT_ROOT)
-    print(output.relative_to(PROJECT_ROOT).as_posix())
+    output = export_chunks(bundle, PROJECT_ROOT, output_root=output_root)
+    print(output.resolve())
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--output-root", type=Path, required=True)
+    parser.add_argument("--inventory", type=Path)
+    args = parser.parse_args()
+    main(args.output_root, args.inventory)

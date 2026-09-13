@@ -7,43 +7,18 @@
 - Input: question and prepared evidence.
 - LLM output: categorical status, answer text, evidence-based reason and citation labels.
 - Pydantic checks structure and citation membership; it does not prove medical correctness.
-- Local integration is implemented; live model and tokenizer verification remain pending.
+- Local integration is implemented; live model verification remain pending.
 
 
-## Technical working: request to validated answer
+## Technical working: hosted requests
 
-Implementation: [answer_generation.py](../../src/mobile_rag/answer_generation.py) and [answer_schema.py](../../src/mobile_rag/answer_schema.py).
-
-1. `make_request()` checks context consistency and builds one user message containing instructions and encoded evidence.
-2. `answer_json_schema()` generates the Pydantic JSON Schema and adds the current citation-label enum.
-3. `GemmaTokenCounter.count()` applies the local tokenizer chat template and generation prefix. It requires local tokenizer/config/template files; no weights are loaded.
-4. `generate_answer()` blocks if local prompt tokens + output reserve + formatting margin exceed the configured total. Without a tokenizer, return `tokenizer_required`; with `live=False`, a configured request returns `dry_run`.
-5. Live execution requires the API key, sends one non-streaming request and measures elapsed request time. No automatic retry or alternate model is used.
-6. Check returned model and normal completion. Parse through `GroundedAnswer.model_validate_json(..., context={"citation_map": ...})`; return its dictionary only after validation.
-
-### Example: token gate
-
-```text
-Local prompt count:  31,500
-Output reserve:      1,024
-Formatting margin:     512
-Total:              33,036 > configured 32,768
-Outcome: budget_blocked; no model request
-```
-
-The numbers are illustrative. Local template counting does not prove provider-template parity; schema processing can add upstream overhead.
-
-### Example: validation rules
-
-| Model output | Result |
-| --- | --- |
-| Nonblank answer/reason, status answered, citations all supplied | Structurally accepted |
-| Valid JSON citing S99 when only S1 exists | Rejected as invalid response |
-| Answered with an empty reason | Rejected by Pydantic |
-| Insufficient evidence with empty answer/citations and nonblank reason | Valid abstention |
-| Completion ends because of output length | Incomplete response, not an accepted answer |
-
-A valid evidence-based-looking reason can still be unsupported. These rules validate structure and references; semantic evaluation remains separate.
+- Build the request from validated context and the Pydantic answer schema.
+- No local tokenizer, tokenizer directory, transformer dependency or input-token preflight is used.
+- `LIVE=False` saves a dry-run request without requiring an API key.
+- `LIVE=True` requires only `OPENROUTER_API_KEY` for model access.
+- Context preparation limits evidence characters; `max_tokens` limits generated output. OpenRouter enforces its context window; errors are returned as `api_error` without silent truncation or retries.
+- Keep provider-reported usage and latency. There is no local/provider token-count comparison.
+- Validate response shape, citation labels and completion status before accepting an answer.
 
 
 ## Function flow
@@ -58,7 +33,7 @@ flowchart TD
     F --> G[Answer or explicit failure]
 ```
 
-Status: implemented locally; hosted verification pending credentials and tokenizer access.
+Status: implemented locally; hosted verification pending credentials.
 
 This function follows context preparation and sends one evidence-only question to `google/gemma-3-4b-it` through OpenRouter. See the [notebook](../../notebooks/answer_generation/05_answer_generation.ipynb) and [runner guide](../../notebooks/answer_generation/README.md).
 
@@ -73,7 +48,7 @@ This function follows context preparation and sends one evidence-only question t
 - Build fresh context from the verified retrieval index. Validate package labels, rendered text, source references and citation mappings. Package consistency validation alone is not source authentication; the normal runner establishes provenance upstream.
 - Send a single user turn containing instructions and encoded question/evidence data. No benchmark answers or external knowledge tools are supplied.
 - Require JSON with `status`, `claims` and `reason`. Every answered claim requires nonempty text and supplied citation labels. Abstention contains no claims and a reason. Temperature zero is not a determinism guarantee.
-- Pin DeepInfra with fallback disabled and require parameter support. Apply an output cap, local token preflight and timeout. Unsupported requests fail without weakening the schema.
+- Pin DeepInfra with fallback disabled and require parameter support. Apply an output cap, timeout. Unsupported requests fail without weakening the schema.
 - Reject unknown citations, malformed JSON, unexpected models and non-normal completion endings, including truncation. Citation identity is checked; semantic support and clinical correctness are not automatically verified.
 - Record prompt version, request fingerprint, configuration, source identity, accepted output, returned model/provider, usage and elapsed request time. Credentials and raw failed response bodies are omitted. API failures remain distinct from insufficient evidence. No automatic retries.
 
@@ -210,24 +185,16 @@ validated_payload = answer.model_dump()
 - The existing `validate_answer(content, citation_map)` wrapper performs this validation and returns the dictionary payload.
 - Validation errors in the generation pipeline produce `invalid_response` rather than an accepted answer.
 
-## Token budget and limitation
+## Context and output limits
 
-- The optional `generation` dependencies load a local Gemma tokenizer with network downloads and remote code disabled.
-- Tokenizer/config/template hashes are recorded.
-- The complete user message is counted with the local chat template and generation prefix.
-- Defaults: 32,768 total, 1,024 completion and 512 for upstream formatting differences.
-- Oversized prompts are blocked for explicit repacking; no evidence is silently truncated.
+The local tokenizer requirement has been removed. Keep the context preparer's character budget and the configured 1,024-token output cap. These are different units: the character allowance is not an exact input-token limit. Provider context-limit errors are API failures; callers may explicitly repack evidence before another request.
 
-- **Exact local template counts are not exact OpenRouter counts.** Provider message transformations and schema processing may differ.
-- The reserve is experimental, not a verified upper bound.
-- Provider prompt usage is compared with local counts when available.
-- The earlier promise of exact upstream accounting remains unfulfilled until tokenizer access and live provider calibration are available.
+Only OpenRouter's returned usage reports token consumption. No tokenizer files, Hugging Face authentication or local model weights are needed. Hosted verification is still pending an API key.
 
-On 2026-09-13, no `OPENROUTER_API_KEY` or `.env` was configured. Unauthenticated requests for Google's official tokenizer files returned HTTP 401. No license terms were accepted automatically and no replacement tokenizer was substituted. Live inference and real-tokenizer validation remain pending.
 
 ## Outcomes
 
-Statuses: `answered`, `insufficient_evidence`, `invalid_context`, `tokenizer_required`, `credentials_required`, `budget_blocked`, `dry_run`, `api_error`, `incomplete_response`, `invalid_response`. Accepted structure still requires semantic evaluation.
+Statuses: `answered`, `insufficient_evidence`, `invalid_context`, `credentials_required`, `budget_blocked`, `dry_run`, `api_error`, `incomplete_response`, `invalid_response`. Accepted structure still requires semantic evaluation.
 
 Empty or budget-blocked context produces local insufficient evidence with an explicit reason and no request. Invalid context is rejected. With ready but inadequate evidence, abstention is prompted; its reliability must be measured on the supplied Q&A.
 
@@ -236,7 +203,7 @@ Empty or budget-blocked context produces local insufficient evidence with an exp
 Pydantic integration verification: 23 project tests passed, Ruff passed, and the answer-generation notebook was re-executed offline. Additional cases cover strict types, extra fields, blank claims/reasons, citation scope and schema generation. Hosted schema acceptance remains unverified.
 
 - Verification recorded 2026-09-13: all 13 project tests passed and Ruff passed.
-- The notebook executed four code cells in a fresh kernel with no cell errors. [Saved result](../../artifacts/answer-generation/20260913T101127326269Z/result.json) records `tokenizer_required` and `live_request_sent=false`; the same run includes the real corpus context and request preview.
+- The notebook executed four code cells in a fresh kernel with no cell errors. [Saved result](../../artifacts/05_answer_generation/20260913T101127326269Z/result.json) records `tokenizer_required` and `live_request_sent=false`; the same run includes the real corpus context and request preview.
 - No hosted answer or benchmark score was produced.
 - Tests use an explicitly synthetic token counter and injected response transport; the official tokenizer and hosted API path remain unverified.
 
@@ -253,3 +220,7 @@ After hosted verification, the next function is answer evaluation using existing
 - Request fields follow the [OpenRouter API reference](https://openrouter.ai/docs/api/reference/overview) and [structured-output guide](https://openrouter.ai/docs/guides/features/structured-outputs).
 - Tokenizer access follows the [official Google repository](https://huggingface.co/google/gemma-3-4b-it).
 - No prices are hard-coded; API usage/cost fields are retained when returned.
+
+## Environment configuration
+
+API key precedence: explicit `api_key` argument, process environment, project-root `.env`, then `src/mobile_rag/.env`. Real `.env` files are read at request time with python-dotenv; `.env.example` is never loaded. Existing process variables are not overwritten and secrets are not logged.

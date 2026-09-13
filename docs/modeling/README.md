@@ -2,7 +2,7 @@
 
 Follow the [architecture master plan](../architecture/12-delivery-roadmap.md), with implementation evidence saved in notebooks and reviewed step by step.
 
-Latest purpose-based function: [Answer generation](../architecture/06-answer-generation.md), implemented in [its notebook](../../notebooks/answer_generation/05_answer_generation.ipynb). Local checks are available; hosted verification requires credentials and tokenizer setup.
+Latest purpose-based function: [Answer generation](../architecture/06-answer-generation.md), implemented in [its notebook](../../notebooks/answer_generation/05_answer_generation.ipynb). Local checks are available; hosted verification requires an OpenRouter API key.
 
 | Step | Specification | Planned notebook | Status |
 | --- | --- | --- | --- |

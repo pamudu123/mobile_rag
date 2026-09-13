@@ -117,11 +117,11 @@ No gold-passage recall, independent test-set accuracy, or clinical accuracy is r
 | `notebooks/retrieval/README.md` | Run commands and input/output guide |
 | `src/mobile_rag/retrieval.py` | Shared index, query compilation, search, and expansion logic |
 | `tests/test_retrieval.py` | Focused integrity, query-safety, ranking, and provenance tests |
-| `artifacts/step-06/<run-id>/retrieval.sqlite` | Published local database |
-| `artifacts/step-06/<run-id>/index_manifest.json` | Input/output hashes, config, versions, counts, and status |
-| `artifacts/step-06/<run-id>/search_examples.jsonl` | Complete saved queries/results and evidence |
-| `artifacts/step-06/<run-id>/timings.csv` | Measured build/open/search/expansion timings |
-| `artifacts/step-06/<run-id>/check_results.json` | Named verification results |
+| `artifacts/03_retrieval_baseline/<run-id>/retrieval.sqlite` | Published local database |
+| `artifacts/03_retrieval_baseline/<run-id>/index_manifest.json` | Input/output hashes, config, versions, counts, and status |
+| `artifacts/03_retrieval_baseline/<run-id>/search_examples.jsonl` | Complete saved queries/results and evidence |
+| `artifacts/03_retrieval_baseline/<run-id>/timings.csv` | Measured build/open/search/expansion timings |
+| `artifacts/03_retrieval_baseline/<run-id>/check_results.json` | Named verification results |
 | `docs/modeling/06-build-review.md` | Actual implementation, examples, measurements, and limitations |
 
 These are proposed paths only. Preserve existing source data, prior runs, and user edits. No Step 6 folder or executable artifact is created by this planning task.

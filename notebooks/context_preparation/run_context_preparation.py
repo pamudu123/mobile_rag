@@ -16,9 +16,9 @@ from mobile_rag.retrieval import digest, write_json
 from mobile_rag.retrieval_enhanced import EnhancedRetriever
 
 
-def run(index=None):
-    index = index or max((ROOT / "artifacts/step-07").glob("*/enhancement_manifest.json")).parent
-    out = ROOT / "artifacts/context-preparation" / datetime.now(UTC).strftime("%Y%m%dT%H%M%S%fZ")
+def run(index=None, *, output_root: Path):
+    index = index or max((ROOT / "artifacts/03_retrieval_enhanced").glob("*/enhancement_manifest.json")).parent
+    out = Path(output_root) / datetime.now(UTC).strftime("%Y%m%dT%H%M%S%fZ")
     out.mkdir(parents=True)
     hashes = {name: digest(index / name) for name in ("retrieval.sqlite", "passage.sqlite")}
     packages, measurements = {}, []
@@ -79,4 +79,6 @@ def run(index=None):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--index", type=Path)
-    run(parser.parse_args().index)
+    parser.add_argument("--output-root", type=Path, required=True)
+    args = parser.parse_args()
+    run(args.index, output_root=args.output_root)

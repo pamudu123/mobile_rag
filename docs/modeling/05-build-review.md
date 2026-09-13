@@ -7,7 +7,7 @@ Status: ready for user review. Executed: 2026-09-13.
 - [Step 5 notebook](../../notebooks/markdown_chunking/02_markdown_chunking.ipynb) with saved outputs.
 - [Step 5 folder guide](../../notebooks/markdown_chunking/README.md) and headless runner.
 - Deterministic Markdown parsing, structure-aware chunking, provenance, citation targets, exports, and validation in `src/mobile_rag/corpus.py`.
-- Machine-readable evidence in [`artifacts/step-05/2026-09-13T08-01-20+00-00_9f352c688e/`](../../artifacts/step-05/2026-09-13T08-01-20+00-00_9f352c688e/).
+- Machine-readable evidence in [`artifacts/02_markdown_chunking/2026-09-13T08-01-20+00-00_9f352c688e/`](../../artifacts/02_markdown_chunking/2026-09-13T08-01-20+00-00_9f352c688e/).
 
 ## Results
 
