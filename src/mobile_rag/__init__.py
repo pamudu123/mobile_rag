@@ -1,5 +1,3 @@
-"""Document-grounded RAG experiment using OpenRouter."""
+"""Tools for the mobile document-grounded RAG experiment."""
 
-from .rag import RagResult, ask, build_index
-
-__all__ = ["RagResult", "ask", "build_index"]
+__all__: list[str] = []

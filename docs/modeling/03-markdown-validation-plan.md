@@ -6,7 +6,7 @@ Status: documented proposal; implementation not started.
 
 Build `notebooks/03_markdown_validation.ipynb` after the relevant inventory inputs from Step 2 are available and implementation is authorized. Use the existing Markdown documents as the text inputs; use original PDFs only to verify source fidelity and citation locations. No OCR or PDF-to-Markdown conversion is planned.
 
-This follows **Step 3: Validate extraction and source coordinates** in the [architecture master plan](../architecture/06-step-by-step-plan.md). The preceding conversation mentioned chunking as the next preparation task; under the existing numbering, benchmark review is Step 4 and final passage/chunk contracts are Step 5. This notebook prepares auditable source blocks for those steps; it does not build retrieval chunks or an index.
+This follows **Step 3: Validate extraction and source coordinates** in the [architecture master plan](../architecture/12-delivery-roadmap.md). The preceding conversation mentioned chunking as the next preparation task; under the existing numbering, benchmark review is Step 4 and final passage/chunk contracts are Step 5. This notebook prepares auditable source blocks for those steps; it does not build retrieval chunks or an index.
 
 ## What we will implement
 
@@ -93,7 +93,7 @@ A confirmed defect is logged and the affected span is marked excluded pending co
 
 Offsets use zero-based, end-exclusive Unicode code points against the exact decoded Markdown string. Preserve original line endings when loading; do not apply newline normalization before measuring offsets. For discontiguous or multi-page evidence, store ordered span references rather than pretending it occupies a single contiguous range.
 
-Use 1-based physical PDF pages in exported records, translating explicitly to a library's 0-based page index. Printed page labels are separate and may be unknown. PDF boxes use the coordinate/rotation convention in the [system design](../architecture/01-system-design.md).
+Use 1-based physical PDF pages in exported records, translating explicitly to a library's 0-based page index. Printed page labels are separate and may be unknown. PDF boxes use the coordinate/rotation convention in the [system design](../architecture/01-system-overview.md).
 
 Native PDF text search may suggest a bounding box, but repeated phrases and table layouts require confirmation. For scanned pages without reliable text coordinates, retain an explicitly unverified mapping and offer the PDF page plus extracted-text highlight. Do not run OCR or invent a precise overlay. Source-block offsets can support Markdown highlighting even when PDF coordinates are unavailable.
 

@@ -5,9 +5,32 @@ description = "On-device retrieval-augmented generation for mobile."
 requires-python = ">=3.11"
 dependencies = [
     "pillow>=12.3.0",
+    "pydantic>=2.10,<3",
     "pymupdf>=1.28.2",
     "rapidocr-onnxruntime>=1.4.4",
 ]
+
+[project.optional-dependencies]
+generation = [
+    "sentencepiece>=0.2.2",
+    "transformers>=4.50,<6",
+]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=6.25",
+    "nbclient>=0.5",
+    "nbformat>=5.9",
+    "pytest>=8.0",
+    "ruff>=0.12",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
 
 [build-system]
 requires = ["hatchling"]

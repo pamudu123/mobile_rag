@@ -1,16 +1,16 @@
 ﻿# Step 2: Corpus inventory and lightweight Markdown checks
 
-Status: documented; awaiting the user's pass to implement. This is the first executable building phase. Step 1 is documentation-only.
+Status: implemented and ready for review. See [the build review](02-build-review.md).
 
 User scope update: Step 3 is merged into this phase and skipped as a separate build. Include only practical Markdown readability/structure checks here. Detailed OCR diagnostics, original-PDF content auditing, manual review queues, and bounding-box alignment are deferred; there is no Step 3 notebook or prerequisite audit to complete before Step 5.
 
 ## What we will build
 
-Build and execute **`notebooks/02_corpus_inventory.ipynb`** to produce an auditable inventory of the supplied PDFs and their existing Markdown extractions. The notebook will identify exact duplicates, unreadable/empty files, missing extractions, and uncertain file pairings before retrieval work begins.
+Build and execute **`notebooks/corpus_inventory/01_corpus_inventory.ipynb`** to produce an auditable inventory of the supplied PDFs and their existing Markdown extractions. The notebook will identify exact duplicates, unreadable/empty files, missing extractions, and uncertain file pairings before retrieval work begins.
 
 The previous inspection reported 15 PDFs recursively and 14 Markdown files. Treat these as observations to reconcile, not expected counts to hard-code. The notebook must report actual files and locations, including nested files, and distinguish physical file count from unique PDF content count.
 
-This implements the technical inventory portion of [master Step 2](../architecture/06-step-by-step-plan.md). Clinical authority, applicability, and supersession remain manual review fields; successful execution alone does not complete that clinical review.
+This implements the technical inventory portion of [master Step 2](../architecture/12-delivery-roadmap.md). Clinical authority, applicability, and supersession remain manual review fields; successful execution alone does not complete that clinical review.
 
 ## Inputs and boundaries
 
@@ -89,7 +89,7 @@ All paths below are future outputs, not artifacts created during this documentat
 
 | Path | Purpose |
 | --- | --- |
-| `notebooks/02_corpus_inventory.ipynb` | Runnable notebook with saved output tables |
+| `notebooks/corpus_inventory/01_corpus_inventory.ipynb` | Runnable notebook with saved output tables |
 | `artifacts/step-02/<run-id>/corpus_manifest.json` | Complete versioned inventory, content identities, pairings, and review placeholders |
 | `artifacts/step-02/<run-id>/file_inventory.csv` | Flat inventory for inspection |
 | `artifacts/step-02/<run-id>/issues.csv` | File, matching, and structural problems |
@@ -125,7 +125,7 @@ After the user gives a pass:
 
 Acceptance requires a reproducible, complete inventory and an honest issues report, not an issue-free corpus. Proceeding beyond this phase requires review of the results and explicit next-step scope. Detailed OCR auditing/correction is deferred. Clinical source approval, benchmark annotation, and retrieval implementation are outside this build. Step 5 follows this combined phase; Step 3 is not a separate execution gate.
 
-## Current approval boundary
+## Implementation outcome
 
-This document specifies only the proposed Step 2 build. No notebook, artifact directory, implementation code, or model request has been created. After the user's pass, implement and execute this bounded inventory phase and return its evidence for review.
+The bounded inventory phase has been implemented and executed. See [the build review](02-build-review.md) for actual counts, checks, issues, and limitations. No model request or skipped-stage work was performed.
 

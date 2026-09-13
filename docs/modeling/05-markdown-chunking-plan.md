@@ -1,10 +1,10 @@
 # Step 5: Markdown passages, chunks, and citation metadata
 
-Status: documented proposal; awaiting authorization to implement.
+Status: implemented and ready for review. See [the build review](05-build-review.md).
 
 ## What we will build
 
-Build **`notebooks/05_markdown_chunking.ipynb`** to convert the existing Markdown into traceable passages and retrieval-ready chunks. Each chunk will retain its document identity, heading context, ordered source spans, available page references, and links to neighboring passages.
+Build **`notebooks/markdown_chunking/02_markdown_chunking.ipynb`** to convert the existing Markdown into traceable passages and retrieval-ready chunks. Each chunk will retain its document identity, heading context, ordered source spans, available page references, and links to neighboring passages.
 
 This is the next active building phase after Step 2. Step 3 is merged into Step 2 and Step 4 is skipped. No OCR audit, benchmark annotation, or test-split preparation is required here. Use the existing text without rewriting clinical content; the Q&A remains outside the chunking inputs.
 
@@ -107,7 +107,7 @@ The future answer contract remains `answered`, `abstained`, or `error`, with cla
 
 | Path | Purpose |
 | --- | --- |
-| `notebooks/05_markdown_chunking.ipynb` | Executed notebook with saved examples and checks |
+| `notebooks/markdown_chunking/02_markdown_chunking.ipynb` | Executed notebook with saved examples and checks |
 | `artifacts/step-05/<run-id>/documents.jsonl` | Selected documents and source metadata |
 | `artifacts/step-05/<run-id>/passages.jsonl` | Exact source passages with offsets and structural context |
 | `artifacts/step-05/<run-id>/chunks.jsonl` | Retrieval-ready chunks, segment mappings, and links |
@@ -138,4 +138,4 @@ Ready for review means every input is accounted for, all emitted passages/chunks
 
 Acceptance does not establish retrieval quality, OCR accuracy, clinical correctness, or model performance. Those claims are not made by chunking. No Step 3/4 review prerequisite is reintroduced.
 
-After review and authorization, Step 6 can build the SQLite FTS5/BM25 index from `chunks.jsonl` and its linked source records. Stop this phase before indexing, embeddings, or inference. The current task writes only this specification.
+After review and authorization, Step 6 can build the SQLite FTS5/BM25 index from `chunks.jsonl` and its linked source records. This phase stopped before indexing, embeddings, or inference. See [the build review](05-build-review.md) for the executed evidence.
