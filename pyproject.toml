@@ -1,0 +1,14 @@
+[project]
+name = "mobile-rag"
+version = "0.1.0"
+description = "On-device retrieval-augmented generation for mobile."
+requires-python = ">=3.11"
+dependencies = [
+    "pillow>=12.3.0",
+    "pymupdf>=1.28.2",
+    "rapidocr-onnxruntime>=1.4.4",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

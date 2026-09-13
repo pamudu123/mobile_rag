@@ -21,3 +21,7 @@ build/
 # OS
 .DS_Store
 Thumbs.db
+
+data/pdf_docs
+data/md_docs
+data/questions/FrontlineAI_100_Clinically_Grounded_QA_Benchmark.pdf

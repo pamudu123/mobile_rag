@@ -1,0 +1,970 @@
+{
+  "metadata": {
+    "title": "FrontlineAI - Set 2: Scenario-Based RAG Test Questions & Answers",
+    "subtitle": "Papua New Guinea / WHO benchmark with mixed answerable and deliberately unanswerable items",
+    "purpose": "Evaluation set for RAG grounding tests. Includes clinically answerable questions from the 14 supplied documents and deliberately unanswerable questions where the corpus lacks authoritative guidance. A correct system should cite sources for answerable items and refuse or state uncertainty for unanswerable ones.",
+    "design": "Fifty topics x two scenario templates = 100 questions. Scenario templates differ from Set 1: night_shift_worker, parent_counselling, referral_decision, and doctor_on_call. Unanswerable items use category 'Unanswerable' and source_of_truth 'Not in corpus.'",
+    "source_hierarchy": "1) Newer PNG/WHO updates for the exact topic; 2) PNG national standard-treatment guidance for local practice; 3) WHO technical guidance; 4) older PNG textbooks mainly as supporting context. The older 2003 paediatrics text was not allowed to override later treatment guidance."
+  },
+  "questions": [
+    {
+      "id": 1,
+      "category": "Malaria",
+      "topic": "Uncomplicated malaria ACT treatment",
+      "question_template": "night_shift_worker",
+      "question": "On night shift at the health centre, I encounter this situation: Uncomplicated malaria ACT treatment. What should I do according to the guideline?",
+      "answer": "For uncomplicated malaria with a positive malaria test (or when testing is unavailable) and no severe signs, give ACT (Co-artem/MALA), paracetamol if temperature is 38°C or higher, treat other causes of fever if present, continue treatment at home, and review if fever persists.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 73."
+    },
+    {
+      "id": 2,
+      "category": "Malaria",
+      "topic": "Uncomplicated malaria ACT treatment",
+      "question_template": "parent_counselling",
+      "question": "A worried parent asks me about Uncomplicated malaria ACT treatment. What is the correct guidance I should give?",
+      "answer": "For uncomplicated malaria with a positive malaria test (or when testing is unavailable) and no severe signs, give ACT (Co-artem/MALA), paracetamol if temperature is 38°C or higher, treat other causes of fever if present, continue treatment at home, and review if fever persists.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 73."
+    },
+    {
+      "id": 3,
+      "category": "Malaria",
+      "topic": "Severe malaria pre-referral artesunate",
+      "question_template": "referral_decision",
+      "question": "I must decide whether to keep the patient here or refer urgently. The issue is Severe malaria pre-referral artesunate. What do the documents say?",
+      "answer": "For very sick, unconscious, or convulsing children with severe malaria, give pre-referral artesunate suppository 10 mg/kg, hold the buttocks together for 10 minutes after insertion, repeat after 24 hours and daily until referral, and refer urgently to hospital.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 74."
+    },
+    {
+      "id": 4,
+      "category": "Malaria",
+      "topic": "Severe malaria pre-referral artesunate",
+      "question_template": "doctor_on_call",
+      "question": "The on-call doctor phones and asks about Severe malaria pre-referral artesunate. What is the evidence-based answer from our documents?",
+      "answer": "For very sick, unconscious, or convulsing children with severe malaria, give pre-referral artesunate suppository 10 mg/kg, hold the buttocks together for 10 minutes after insertion, repeat after 24 hours and daily until referral, and refer urgently to hospital.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 74."
+    },
+    {
+      "id": 5,
+      "category": "Measles",
+      "topic": "Measles vitamin A dosing",
+      "question_template": "night_shift_worker",
+      "question": "On night shift at the health centre, I encounter this situation: Measles vitamin A dosing. What should I do according to the guideline?",
+      "answer": "Give two doses of oral vitamin A to children with measles at a hospital or health centre: under 1 year 100,000 units on day 1 and day 2; age 1 year or more 200,000 units on day 1 and day 2.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 100."
+    },
+    {
+      "id": 6,
+      "category": "Measles",
+      "topic": "Measles vitamin A dosing",
+      "question_template": "parent_counselling",
+      "question": "A worried parent asks me about Measles vitamin A dosing. What is the correct guidance I should give?",
+      "answer": "Give two doses of oral vitamin A to children with measles at a hospital or health centre: under 1 year 100,000 units on day 1 and day 2; age 1 year or more 200,000 units on day 1 and day 2.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 100."
+    },
+    {
+      "id": 7,
+      "category": "Measles",
+      "topic": "Measles admission criteria",
+      "question_template": "referral_decision",
+      "question": "I must decide whether to keep the patient here or refer urgently. The issue is Measles admission criteria. What do the documents say?",
+      "answer": "Admit a child with measles if they look very sick, are malnourished, or have serious complications such as pneumonia, dark staining rash, diarrhoea with dehydration, stridor, convulsions, severe oral thrush, or difficulty drinking.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 100."
+    },
+    {
+      "id": 8,
+      "category": "Measles",
+      "topic": "Measles admission criteria",
+      "question_template": "doctor_on_call",
+      "question": "The on-call doctor phones and asks about Measles admission criteria. What is the evidence-based answer from our documents?",
+      "answer": "Admit a child with measles if they look very sick, are malnourished, or have serious complications such as pneumonia, dark staining rash, diarrhoea with dehydration, stridor, convulsions, severe oral thrush, or difficulty drinking.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 100."
+    },
+    {
+      "id": 9,
+      "category": "Pneumonia",
+      "topic": "Fast breathing thresholds by age",
+      "question_template": "night_shift_worker",
+      "question": "On night shift at the health centre, I encounter this situation: Fast breathing thresholds by age. What should I do according to the guideline?",
+      "answer": "Fast breathing is defined as: age 0–2 months greater than 60 breaths/min; age 2–12 months greater than 50 breaths/min; age over 12 months greater than 40 breaths/min.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), pp. 119–120."
+    },
+    {
+      "id": 10,
+      "category": "Pneumonia",
+      "topic": "Fast breathing thresholds by age",
+      "question_template": "parent_counselling",
+      "question": "A worried parent asks me about Fast breathing thresholds by age. What is the correct guidance I should give?",
+      "answer": "Fast breathing is defined as: age 0–2 months greater than 60 breaths/min; age 2–12 months greater than 50 breaths/min; age over 12 months greater than 40 breaths/min.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), pp. 119–120."
+    },
+    {
+      "id": 11,
+      "category": "Pneumonia",
+      "topic": "Severe pneumonia initial management",
+      "question_template": "referral_decision",
+      "question": "I must decide whether to keep the patient here or refer urgently. The issue is Severe pneumonia initial management. What do the documents say?",
+      "answer": "For severe pneumonia with too-sick signs plus chest indrawing and/or cyanosis: give oxygen, give first dose of amoxyl (or penicillin) and gentamicin, and admit or refer urgently to hospital if possible.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 119."
+    },
+    {
+      "id": 12,
+      "category": "Pneumonia",
+      "topic": "Severe pneumonia initial management",
+      "question_template": "doctor_on_call",
+      "question": "The on-call doctor phones and asks about Severe pneumonia initial management. What is the evidence-based answer from our documents?",
+      "answer": "For severe pneumonia with too-sick signs plus chest indrawing and/or cyanosis: give oxygen, give first dose of amoxyl (or penicillin) and gentamicin, and admit or refer urgently to hospital if possible.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 119."
+    },
+    {
+      "id": 13,
+      "category": "Pneumonia",
+      "topic": "Parent warning signs of pneumonia",
+      "question_template": "night_shift_worker",
+      "question": "On night shift at the health centre, I encounter this situation: Parent warning signs of pneumonia. What should I do according to the guideline?",
+      "answer": "Teach parents the warning signs of pneumonia: fast breathing and chest indrawing. Antibiotics must not be used for colds; fast breathing or another clear indication is needed before treating cough with antibiotics.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), pp. 43–44."
+    },
+    {
+      "id": 14,
+      "category": "Pneumonia",
+      "topic": "Parent warning signs of pneumonia",
+      "question_template": "parent_counselling",
+      "question": "A worried parent asks me about Parent warning signs of pneumonia. What is the correct guidance I should give?",
+      "answer": "Teach parents the warning signs of pneumonia: fast breathing and chest indrawing. Antibiotics must not be used for colds; fast breathing or another clear indication is needed before treating cough with antibiotics.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), pp. 43–44."
+    },
+    {
+      "id": 15,
+      "category": "Convulsions",
+      "topic": "Convulsion airway care",
+      "question_template": "referral_decision",
+      "question": "I must decide whether to keep the patient here or refer urgently. The issue is Convulsion airway care. What do the documents say?",
+      "answer": "Ensure a clear airway: place the child on the side, suction secretions, give oxygen during the fit, and check blood sugar if possible. Treat hypoglycaemia with dextrose or sugar under the tongue when indicated.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 45."
+    },
+    {
+      "id": 16,
+      "category": "Convulsions",
+      "topic": "Convulsion airway care",
+      "question_template": "doctor_on_call",
+      "question": "The on-call doctor phones and asks about Convulsion airway care. What is the evidence-based answer from our documents?",
+      "answer": "Ensure a clear airway: place the child on the side, suction secretions, give oxygen during the fit, and check blood sugar if possible. Treat hypoglycaemia with dextrose or sugar under the tongue when indicated.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 45."
+    },
+    {
+      "id": 17,
+      "category": "Convulsions",
+      "topic": "Rectal diazepam dose 3–5.9 kg",
+      "question_template": "night_shift_worker",
+      "question": "On night shift at the health centre, I encounter this situation: Rectal diazepam dose 3–5.9 kg. What should I do according to the guideline?",
+      "answer": "For a child weighing 3–5.9 kg, give ¼ ml rectal diazepam (10 mg/2 ml vial), or the equivalent IV or IM paraldehyde dose as listed in the convulsions section.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 45."
+    },
+    {
+      "id": 18,
+      "category": "Convulsions",
+      "topic": "Rectal diazepam dose 3–5.9 kg",
+      "question_template": "parent_counselling",
+      "question": "A worried parent asks me about Rectal diazepam dose 3–5.9 kg. What is the correct guidance I should give?",
+      "answer": "For a child weighing 3–5.9 kg, give ¼ ml rectal diazepam (10 mg/2 ml vial), or the equivalent IV or IM paraldehyde dose as listed in the convulsions section.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 45."
+    },
+    {
+      "id": 19,
+      "category": "Diarrhoea",
+      "topic": "Severe dehydration fast IV bolus 10–14.9 kg",
+      "question_template": "referral_decision",
+      "question": "I must decide whether to keep the patient here or refer urgently. The issue is Severe dehydration fast IV bolus 10–14.9 kg. What do the documents say?",
+      "answer": "For severe dehydration, give fast IV Half Strength Darrow's or Hartmann's solution: 250 ml for a child weighing 10–14.9 kg, then reassess immediately and repeat if severe dehydration persists.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 49."
+    },
+    {
+      "id": 20,
+      "category": "Diarrhoea",
+      "topic": "Severe dehydration fast IV bolus 10–14.9 kg",
+      "question_template": "doctor_on_call",
+      "question": "The on-call doctor phones and asks about Severe dehydration fast IV bolus 10–14.9 kg. What is the evidence-based answer from our documents?",
+      "answer": "For severe dehydration, give fast IV Half Strength Darrow's or Hartmann's solution: 250 ml for a child weighing 10–14.9 kg, then reassess immediately and repeat if severe dehydration persists.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 49."
+    },
+    {
+      "id": 21,
+      "category": "Diarrhoea",
+      "topic": "ORS when IV access fails",
+      "question_template": "night_shift_worker",
+      "question": "On night shift at the health centre, I encounter this situation: ORS when IV access fails. What should I do according to the guideline?",
+      "answer": "If IV access cannot be obtained for severe dehydration, give ORS or Half Strength Darrow's by nasogastric drip, confirming tube placement and splinting the elbows. Use ReSoMal if the child has severe malnutrition and ReSoMal is available.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 50."
+    },
+    {
+      "id": 22,
+      "category": "Diarrhoea",
+      "topic": "ORS when IV access fails",
+      "question_template": "parent_counselling",
+      "question": "A worried parent asks me about ORS when IV access fails. What is the correct guidance I should give?",
+      "answer": "If IV access cannot be obtained for severe dehydration, give ORS or Half Strength Darrow's by nasogastric drip, confirming tube placement and splinting the elbows. Use ReSoMal if the child has severe malnutrition and ReSoMal is available.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 50."
+    },
+    {
+      "id": 23,
+      "category": "Snake bite",
+      "topic": "Snake bite limb bandaging",
+      "question_template": "referral_decision",
+      "question": "I must decide whether to keep the patient here or refer urgently. The issue is Snake bite limb bandaging. What do the documents say?",
+      "answer": "At the bite site, bandage the whole length of the bitten limb from hand or foot toward shoulder or thigh as firmly as an ankle bandage, splint the limb, place the child in the left lateral recovery position, and keep the airway clear.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 138."
+    },
+    {
+      "id": 24,
+      "category": "Snake bite",
+      "topic": "Snake bite limb bandaging",
+      "question_template": "doctor_on_call",
+      "question": "The on-call doctor phones and asks about Snake bite limb bandaging. What is the evidence-based answer from our documents?",
+      "answer": "At the bite site, bandage the whole length of the bitten limb from hand or foot toward shoulder or thigh as firmly as an ankle bandage, splint the limb, place the child in the left lateral recovery position, and keep the airway clear.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 138."
+    },
+    {
+      "id": 25,
+      "category": "Snake bite",
+      "topic": "Snake bite clotting test",
+      "question_template": "night_shift_worker",
+      "question": "On night shift at the health centre, I encounter this situation: Snake bite clotting test. What should I do according to the guideline?",
+      "answer": "Take a blood sample and leave it 20 minutes without shaking; failure to clot after 20 minutes is abnormal and indicates need for envenomation treatment with antivenom.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 138."
+    },
+    {
+      "id": 26,
+      "category": "Snake bite",
+      "topic": "Snake bite clotting test",
+      "question_template": "parent_counselling",
+      "question": "A worried parent asks me about Snake bite clotting test. What is the correct guidance I should give?",
+      "answer": "Take a blood sample and leave it 20 minutes without shaking; failure to clot after 20 minutes is abnormal and indicates need for envenomation treatment with antivenom.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 138."
+    },
+    {
+      "id": 27,
+      "category": "Obstetrics",
+      "topic": "Eclampsia magnesium urgency",
+      "question_template": "referral_decision",
+      "question": "I must decide whether to keep the patient here or refer urgently. The issue is Eclampsia magnesium urgency. What do the documents say?",
+      "answer": "For eclampsia (fits after 20 weeks), ensure airway by rolling onto the side and give magnesium sulphate loading dose urgently to control and prevent further fits. Do not wait for a doctor's order.",
+      "source_of_truth": "PNG O&G Standard Management Manual (2018), pp. 74–75."
+    },
+    {
+      "id": 28,
+      "category": "Obstetrics",
+      "topic": "Eclampsia magnesium urgency",
+      "question_template": "doctor_on_call",
+      "question": "The on-call doctor phones and asks about Eclampsia magnesium urgency. What is the evidence-based answer from our documents?",
+      "answer": "For eclampsia (fits after 20 weeks), ensure airway by rolling onto the side and give magnesium sulphate loading dose urgently to control and prevent further fits. Do not wait for a doctor's order.",
+      "source_of_truth": "PNG O&G Standard Management Manual (2018), pp. 74–75."
+    },
+    {
+      "id": 29,
+      "category": "Obstetrics",
+      "topic": "Eclampsia minimum urine output",
+      "question_template": "night_shift_worker",
+      "question": "On night shift at the health centre, I encounter this situation: Eclampsia minimum urine output. What should I do according to the guideline?",
+      "answer": "For an unconscious eclamptic patient, maintain airway, give oxygen, use an indwelling catheter, and record urine output hourly; minimum safe urine output is greater than 25 ml/hour.",
+      "source_of_truth": "PNG O&G Standard Management Manual (2018), p. 74."
+    },
+    {
+      "id": 30,
+      "category": "Obstetrics",
+      "topic": "Eclampsia minimum urine output",
+      "question_template": "parent_counselling",
+      "question": "A worried parent asks me about Eclampsia minimum urine output. What is the correct guidance I should give?",
+      "answer": "For an unconscious eclamptic patient, maintain airway, give oxygen, use an indwelling catheter, and record urine output hourly; minimum safe urine output is greater than 25 ml/hour.",
+      "source_of_truth": "PNG O&G Standard Management Manual (2018), p. 74."
+    },
+    {
+      "id": 31,
+      "category": "Obstetrics",
+      "topic": "Primary PPH definition",
+      "question_template": "referral_decision",
+      "question": "I must decide whether to keep the patient here or refer urgently. The issue is Primary PPH definition. What do the documents say?",
+      "answer": "Primary postpartum haemorrhage is defined as measured blood loss of 500 ml or more within the first 24 hours after vaginal delivery.",
+      "source_of_truth": "PNG O&G Standard Management Manual (2018), p. 157."
+    },
+    {
+      "id": 32,
+      "category": "Obstetrics",
+      "topic": "Primary PPH definition",
+      "question_template": "doctor_on_call",
+      "question": "The on-call doctor phones and asks about Primary PPH definition. What is the evidence-based answer from our documents?",
+      "answer": "Primary postpartum haemorrhage is defined as measured blood loss of 500 ml or more within the first 24 hours after vaginal delivery.",
+      "source_of_truth": "PNG O&G Standard Management Manual (2018), p. 157."
+    },
+    {
+      "id": 33,
+      "category": "Obstetrics",
+      "topic": "PPH prevention oxytocin",
+      "question_template": "night_shift_worker",
+      "question": "On night shift at the health centre, I encounter this situation: PPH prevention oxytocin. What should I do according to the guideline?",
+      "answer": "To help prevent PPH, give oxytocin 10 IU IM with delivery of the baby or as soon after as possible, perform controlled cord traction when the uterus contracts, and rub up the fundus after placental delivery.",
+      "source_of_truth": "PNG O&G Standard Management Manual (2018), p. 158."
+    },
+    {
+      "id": 34,
+      "category": "Obstetrics",
+      "topic": "PPH prevention oxytocin",
+      "question_template": "parent_counselling",
+      "question": "A worried parent asks me about PPH prevention oxytocin. What is the correct guidance I should give?",
+      "answer": "To help prevent PPH, give oxytocin 10 IU IM with delivery of the baby or as soon after as possible, perform controlled cord traction when the uterus contracts, and rub up the fundus after placental delivery.",
+      "source_of_truth": "PNG O&G Standard Management Manual (2018), p. 158."
+    },
+    {
+      "id": 35,
+      "category": "Nutrition",
+      "topic": "F-100 volume for 5 kg child",
+      "question_template": "referral_decision",
+      "question": "I must decide whether to keep the patient here or refer urgently. The issue is F-100 volume for 5 kg child. What do the documents say?",
+      "answer": "For a 5.0 kg child on F-100 catch-up feeding, the reference card gives a minimum daily volume of 750 ml (150 ml/kg/day) and maximum 1100 ml (220 ml/kg/day), with 125–185 ml per 4-hourly feed.",
+      "source_of_truth": "F-100 Reference Card, p. 1."
+    },
+    {
+      "id": 36,
+      "category": "Nutrition",
+      "topic": "F-100 volume for 5 kg child",
+      "question_template": "doctor_on_call",
+      "question": "The on-call doctor phones and asks about F-100 volume for 5 kg child. What is the evidence-based answer from our documents?",
+      "answer": "For a 5.0 kg child on F-100 catch-up feeding, the reference card gives a minimum daily volume of 750 ml (150 ml/kg/day) and maximum 1100 ml (220 ml/kg/day), with 125–185 ml per 4-hourly feed.",
+      "source_of_truth": "F-100 Reference Card, p. 1."
+    },
+    {
+      "id": 37,
+      "category": "Nutrition",
+      "topic": "F-75 feed interval escalation",
+      "question_template": "night_shift_worker",
+      "question": "On night shift at the health centre, I encounter this situation: F-75 feed interval escalation. What should I do according to the guideline?",
+      "answer": "Start F-75 feeds 2-hourly for at least the first day; when there is little or no vomiting, modest diarrhoea, and most feeds are finished, change to 3-hourly feeds, then to 4-hourly after another day if tolerated.",
+      "source_of_truth": "F-75 Reference Card, p. 1."
+    },
+    {
+      "id": 38,
+      "category": "Nutrition",
+      "topic": "F-75 feed interval escalation",
+      "question_template": "parent_counselling",
+      "question": "A worried parent asks me about F-75 feed interval escalation. What is the correct guidance I should give?",
+      "answer": "Start F-75 feeds 2-hourly for at least the first day; when there is little or no vomiting, modest diarrhoea, and most feeds are finished, change to 3-hourly feeds, then to 4-hourly after another day if tolerated.",
+      "source_of_truth": "F-75 Reference Card, p. 1."
+    },
+    {
+      "id": 39,
+      "category": "Nutrition",
+      "topic": "SAM oedema F-75 volume",
+      "question_template": "referral_decision",
+      "question": "I must decide whether to keep the patient here or refer urgently. The issue is SAM oedema F-75 volume. What do the documents say?",
+      "answer": "For children with severe (+++) oedema, the F-75 card uses 100 ml/kg/day instead of 130 ml/kg/day when calculating feed volumes.",
+      "source_of_truth": "F-75 Reference Card, p. 2."
+    },
+    {
+      "id": 40,
+      "category": "Nutrition",
+      "topic": "SAM oedema F-75 volume",
+      "question_template": "doctor_on_call",
+      "question": "The on-call doctor phones and asks about SAM oedema F-75 volume. What is the evidence-based answer from our documents?",
+      "answer": "For children with severe (+++) oedema, the F-75 card uses 100 ml/kg/day instead of 130 ml/kg/day when calculating feed volumes.",
+      "source_of_truth": "F-75 Reference Card, p. 2."
+    },
+    {
+      "id": 41,
+      "category": "Nutrition",
+      "topic": "SAM antibiotics and albendazole",
+      "question_template": "night_shift_worker",
+      "question": "On night shift at the health centre, I encounter this situation: SAM antibiotics and albendazole. What should I do according to the guideline?",
+      "answer": "In severe malnutrition management, start antibiotics and albendazole, exclude HIV and TB, and begin therapeutic milk feeding immediately at about 130 ml/kg/day in frequent feeds while continuing breastfeeding.",
+      "source_of_truth": "Management of Severe Malnutrition chart."
+    },
+    {
+      "id": 42,
+      "category": "Nutrition",
+      "topic": "SAM antibiotics and albendazole",
+      "question_template": "parent_counselling",
+      "question": "A worried parent asks me about SAM antibiotics and albendazole. What is the correct guidance I should give?",
+      "answer": "In severe malnutrition management, start antibiotics and albendazole, exclude HIV and TB, and begin therapeutic milk feeding immediately at about 130 ml/kg/day in frequent feeds while continuing breastfeeding.",
+      "source_of_truth": "Management of Severe Malnutrition chart."
+    },
+    {
+      "id": 43,
+      "category": "CPAP",
+      "topic": "Initial bubble CPAP pressure",
+      "question_template": "referral_decision",
+      "question": "I must decide whether to keep the patient here or refer urgently. The issue is Initial bubble CPAP pressure. What do the documents say?",
+      "answer": "When setting up bubble CPAP, dial the CPAP level required and start at 7 cmH2O, then adjust flows and monitor SpO2 and respiratory distress.",
+      "source_of_truth": "Bubble-CPAP Guidelines (2017), p. 5."
+    },
+    {
+      "id": 44,
+      "category": "CPAP",
+      "topic": "Initial bubble CPAP pressure",
+      "question_template": "doctor_on_call",
+      "question": "The on-call doctor phones and asks about Initial bubble CPAP pressure. What is the evidence-based answer from our documents?",
+      "answer": "When setting up bubble CPAP, dial the CPAP level required and start at 7 cmH2O, then adjust flows and monitor SpO2 and respiratory distress.",
+      "source_of_truth": "Bubble-CPAP Guidelines (2017), p. 5."
+    },
+    {
+      "id": 45,
+      "category": "CPAP",
+      "topic": "CPAP troubleshooting no bubbles",
+      "question_template": "night_shift_worker",
+      "question": "On night shift at the health centre, I encounter this situation: CPAP troubleshooting no bubbles. What should I do according to the guideline?",
+      "answer": "If there are no continuous bubbles during CPAP, check that nasal prongs are attached properly and fit snugly, then check the circuit for leaks and increase air or oxygen flow according to the troubleshooting table.",
+      "source_of_truth": "Bubble-CPAP Guidelines (2017), p. 6."
+    },
+    {
+      "id": 46,
+      "category": "CPAP",
+      "topic": "CPAP troubleshooting no bubbles",
+      "question_template": "parent_counselling",
+      "question": "A worried parent asks me about CPAP troubleshooting no bubbles. What is the correct guidance I should give?",
+      "answer": "If there are no continuous bubbles during CPAP, check that nasal prongs are attached properly and fit snugly, then check the circuit for leaks and increase air or oxygen flow according to the troubleshooting table.",
+      "source_of_truth": "Bubble-CPAP Guidelines (2017), p. 6."
+    },
+    {
+      "id": 47,
+      "category": "CPAP",
+      "topic": "Pre-CPAP hypoxaemia checklist",
+      "question_template": "referral_decision",
+      "question": "I must decide whether to keep the patient here or refer urgently. The issue is Pre-CPAP hypoxaemia checklist. What do the documents say?",
+      "answer": "Before starting CPAP, confirm oxygen is flowing, tubing is not leaking, prongs are fitted correctly, concentrator output is adequate if used, and assess for pleural effusion, pneumothorax, bronchospasm, heart disease, or inadequate respiratory effort.",
+      "source_of_truth": "Bubble-CPAP Guidelines (2017), p. 2."
+    },
+    {
+      "id": 48,
+      "category": "CPAP",
+      "topic": "Pre-CPAP hypoxaemia checklist",
+      "question_template": "doctor_on_call",
+      "question": "The on-call doctor phones and asks about Pre-CPAP hypoxaemia checklist. What is the evidence-based answer from our documents?",
+      "answer": "Before starting CPAP, confirm oxygen is flowing, tubing is not leaking, prongs are fitted correctly, concentrator output is adequate if used, and assess for pleural effusion, pneumothorax, bronchospasm, heart disease, or inadequate respiratory effort.",
+      "source_of_truth": "Bubble-CPAP Guidelines (2017), p. 2."
+    },
+    {
+      "id": 49,
+      "category": "Outbreak",
+      "topic": "Cholera outbreak trigger",
+      "question_template": "night_shift_worker",
+      "question": "On night shift at the health centre, I encounter this situation: Cholera outbreak trigger. What should I do according to the guideline?",
+      "answer": "For cholera, one suspected case (severe dehydration or death from acute watery diarrhoea in a patient aged 5 years or more) is enough to trigger notification and investigation.",
+      "source_of_truth": "Pacific Outbreak Manual (2016), p. 31."
+    },
+    {
+      "id": 50,
+      "category": "Outbreak",
+      "topic": "Cholera outbreak trigger",
+      "question_template": "parent_counselling",
+      "question": "A worried parent asks me about Cholera outbreak trigger. What is the correct guidance I should give?",
+      "answer": "For cholera, one suspected case (severe dehydration or death from acute watery diarrhoea in a patient aged 5 years or more) is enough to trigger notification and investigation.",
+      "source_of_truth": "Pacific Outbreak Manual (2016), p. 31."
+    },
+    {
+      "id": 51,
+      "category": "Outbreak",
+      "topic": "Chikungunya analgesia choice",
+      "question_template": "referral_decision",
+      "question": "I must decide whether to keep the patient here or refer urgently. The issue is Chikungunya analgesia choice. What do the documents say?",
+      "answer": "Chikungunya treatment is symptomatic and paracetamol is the drug of choice. Avoid aspirin and other NSAIDs because dengue fever is an important differential diagnosis.",
+      "source_of_truth": "Pacific Outbreak Manual (2016), p. 28."
+    },
+    {
+      "id": 52,
+      "category": "Outbreak",
+      "topic": "Chikungunya analgesia choice",
+      "question_template": "doctor_on_call",
+      "question": "The on-call doctor phones and asks about Chikungunya analgesia choice. What is the evidence-based answer from our documents?",
+      "answer": "Chikungunya treatment is symptomatic and paracetamol is the drug of choice. Avoid aspirin and other NSAIDs because dengue fever is an important differential diagnosis.",
+      "source_of_truth": "Pacific Outbreak Manual (2016), p. 28."
+    },
+    {
+      "id": 53,
+      "category": "Immunization",
+      "topic": "Vaccine refrigerator storage",
+      "question_template": "night_shift_worker",
+      "question": "On night shift at the health centre, I encounter this situation: Vaccine refrigerator storage. What should I do according to the guideline?",
+      "answer": "Keep all vaccines in the main refrigerator compartment at 2–8°C, not in the freezer; only ice packs belong in the freezer compartment.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 67."
+    },
+    {
+      "id": 54,
+      "category": "Immunization",
+      "topic": "Vaccine refrigerator storage",
+      "question_template": "parent_counselling",
+      "question": "A worried parent asks me about Vaccine refrigerator storage. What is the correct guidance I should give?",
+      "answer": "Keep all vaccines in the main refrigerator compartment at 2–8°C, not in the freezer; only ice packs belong in the freezer compartment.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 67."
+    },
+    {
+      "id": 55,
+      "category": "Immunization",
+      "topic": "Measles vaccine with high fever",
+      "question_template": "referral_decision",
+      "question": "I must decide whether to keep the patient here or refer urgently. The issue is Measles vaccine with high fever. What do the documents say?",
+      "answer": "Measles vaccine should always be given even if there is a high temperature. Pentavalent and hepatitis B vaccines should be delayed until temperature falls if fever is above 38°C.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), pp. 43 and 67."
+    },
+    {
+      "id": 56,
+      "category": "Immunization",
+      "topic": "Measles vaccine with high fever",
+      "question_template": "doctor_on_call",
+      "question": "The on-call doctor phones and asks about Measles vaccine with high fever. What is the evidence-based answer from our documents?",
+      "answer": "Measles vaccine should always be given even if there is a high temperature. Pentavalent and hepatitis B vaccines should be delayed until temperature falls if fever is above 38°C.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), pp. 43 and 67."
+    },
+    {
+      "id": 57,
+      "category": "Immunization",
+      "topic": "BCG birth dose",
+      "question_template": "night_shift_worker",
+      "question": "On night shift at the health centre, I encounter this situation: BCG birth dose. What should I do according to the guideline?",
+      "answer": "BCG should be given as soon as possible after birth: 0.05 ml intradermally in the left upper arm.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 68."
+    },
+    {
+      "id": 58,
+      "category": "Immunization",
+      "topic": "BCG birth dose",
+      "question_template": "parent_counselling",
+      "question": "A worried parent asks me about BCG birth dose. What is the correct guidance I should give?",
+      "answer": "BCG should be given as soon as possible after birth: 0.05 ml intradermally in the left upper arm.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 68."
+    },
+    {
+      "id": 59,
+      "category": "HIV",
+      "topic": "HIV-exposed infant AZT prophylaxis >2500 g",
+      "question_template": "referral_decision",
+      "question": "I must decide whether to keep the patient here or refer urgently. The issue is HIV-exposed infant AZT prophylaxis >2500 g. What do the documents say?",
+      "answer": "For HIV-exposed infants from birth to 6 weeks with birthweight over 2500 g, give AZT 15 mg twice daily as infant prophylaxis when AZT is used.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 65."
+    },
+    {
+      "id": 60,
+      "category": "HIV",
+      "topic": "HIV-exposed infant AZT prophylaxis >2500 g",
+      "question_template": "doctor_on_call",
+      "question": "The on-call doctor phones and asks about HIV-exposed infant AZT prophylaxis >2500 g. What is the evidence-based answer from our documents?",
+      "answer": "For HIV-exposed infants from birth to 6 weeks with birthweight over 2500 g, give AZT 15 mg twice daily as infant prophylaxis when AZT is used.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 65."
+    },
+    {
+      "id": 61,
+      "category": "HIV",
+      "topic": "Paediatric DTG 14–19.9 kg dose",
+      "question_template": "night_shift_worker",
+      "question": "On night shift at the health centre, I encounter this situation: Paediatric DTG 14–19.9 kg dose. What should I do according to the guideline?",
+      "answer": "For the DTG 10 mg scored dispersible tablet, the WHO-recommended once-daily dose for children weighing 14–19.9 kg is 2.5 tablets.",
+      "source_of_truth": "Summary of PNG Preferred First-Line ART (November 2021), p. 1."
+    },
+    {
+      "id": 62,
+      "category": "HIV",
+      "topic": "Paediatric DTG 14–19.9 kg dose",
+      "question_template": "parent_counselling",
+      "question": "A worried parent asks me about Paediatric DTG 14–19.9 kg dose. What is the correct guidance I should give?",
+      "answer": "For the DTG 10 mg scored dispersible tablet, the WHO-recommended once-daily dose for children weighing 14–19.9 kg is 2.5 tablets.",
+      "source_of_truth": "Summary of PNG Preferred First-Line ART (November 2021), p. 1."
+    },
+    {
+      "id": 63,
+      "category": "HIV",
+      "topic": "DTG 50 mg transition weight",
+      "question_template": "referral_decision",
+      "question": "I must decide whether to keep the patient here or refer urgently. The issue is DTG 50 mg transition weight. What do the documents say?",
+      "answer": "DTG 50 mg is the preferred DTG formulation starting at 20 kg; children in lower weight bands use DTG 10 mg scored dispersible tablets.",
+      "source_of_truth": "Summary of PNG Preferred First-Line ART (November 2021), p. 1."
+    },
+    {
+      "id": 64,
+      "category": "HIV",
+      "topic": "DTG 50 mg transition weight",
+      "question_template": "doctor_on_call",
+      "question": "The on-call doctor phones and asks about DTG 50 mg transition weight. What is the evidence-based answer from our documents?",
+      "answer": "DTG 50 mg is the preferred DTG formulation starting at 20 kg; children in lower weight bands use DTG 10 mg scored dispersible tablets.",
+      "source_of_truth": "Summary of PNG Preferred First-Line ART (November 2021), p. 1."
+    },
+    {
+      "id": 65,
+      "category": "Infectious disease",
+      "topic": "Rabies status in PNG",
+      "question_template": "night_shift_worker",
+      "question": "On night shift at the health centre, I encounter this situation: Rabies status in PNG. What should I do according to the guideline?",
+      "answer": "Rabies is not established in Papua New Guinea, although there is a large potential reservoir from imported dogs; once clinical rabies develops the prognosis is very poor even with intensive care.",
+      "source_of_truth": "Paediatrics for Doctors in Papua New Guinea (2003), p. 339."
+    },
+    {
+      "id": 66,
+      "category": "Infectious disease",
+      "topic": "Rabies status in PNG",
+      "question_template": "parent_counselling",
+      "question": "A worried parent asks me about Rabies status in PNG. What is the correct guidance I should give?",
+      "answer": "Rabies is not established in Papua New Guinea, although there is a large potential reservoir from imported dogs; once clinical rabies develops the prognosis is very poor even with intensive care.",
+      "source_of_truth": "Paediatrics for Doctors in Papua New Guinea (2003), p. 339."
+    },
+    {
+      "id": 67,
+      "category": "Obstetrics",
+      "topic": "PPH high-risk anaemia in labour",
+      "question_template": "referral_decision",
+      "question": "I must decide whether to keep the patient here or refer urgently. The issue is PPH high-risk anaemia in labour. What do the documents say?",
+      "answer": "Women with uncorrected anaemia in labour (Hb below 8 g%) are at much higher risk of shock and death from smaller postpartum haemorrhages and should be identified as higher-risk antenatally.",
+      "source_of_truth": "PNG O&G Standard Management Manual (2018), p. 157."
+    },
+    {
+      "id": 68,
+      "category": "Obstetrics",
+      "topic": "PPH high-risk anaemia in labour",
+      "question_template": "doctor_on_call",
+      "question": "The on-call doctor phones and asks about PPH high-risk anaemia in labour. What is the evidence-based answer from our documents?",
+      "answer": "Women with uncorrected anaemia in labour (Hb below 8 g%) are at much higher risk of shock and death from smaller postpartum haemorrhages and should be identified as higher-risk antenatally.",
+      "source_of_truth": "PNG O&G Standard Management Manual (2018), p. 157."
+    },
+    {
+      "id": 69,
+      "category": "Nutrition",
+      "topic": "SAM target weight gain",
+      "question_template": "night_shift_worker",
+      "question": "On night shift at the health centre, I encounter this situation: SAM target weight gain. What should I do according to the guideline?",
+      "answer": "During inpatient severe malnutrition treatment, good weight gain is defined as 10 g/kg/day, with weighing every second day.",
+      "source_of_truth": "Management of Severe Malnutrition chart."
+    },
+    {
+      "id": 70,
+      "category": "Nutrition",
+      "topic": "SAM target weight gain",
+      "question_template": "parent_counselling",
+      "question": "A worried parent asks me about SAM target weight gain. What is the correct guidance I should give?",
+      "answer": "During inpatient severe malnutrition treatment, good weight gain is defined as 10 g/kg/day, with weighing every second day.",
+      "source_of_truth": "Management of Severe Malnutrition chart."
+    },
+    {
+      "id": 71,
+      "category": "Unanswerable",
+      "topic": "Dengue vaccine schedule in PNG",
+      "question_template": "night_shift_worker",
+      "question": "On night shift at the health centre, I encounter this situation: Dengue vaccine schedule in PNG. What should I do according to the guideline?",
+      "answer": "This cannot be answered from the supplied documents. The corpus discusses dengue clinical care and outbreak response but does not provide a PNG dengue vaccination schedule or product recommendations.",
+      "source_of_truth": "Not in corpus."
+    },
+    {
+      "id": 72,
+      "category": "Unanswerable",
+      "topic": "Dengue vaccine schedule in PNG",
+      "question_template": "parent_counselling",
+      "question": "A worried parent asks me about Dengue vaccine schedule in PNG. What is the correct guidance I should give?",
+      "answer": "This cannot be answered from the supplied documents. The corpus discusses dengue clinical care and outbreak response but does not provide a PNG dengue vaccination schedule or product recommendations.",
+      "source_of_truth": "Not in corpus."
+    },
+    {
+      "id": 73,
+      "category": "Unanswerable",
+      "topic": "OpenRouter model choice for on-device iOS RAG",
+      "question_template": "referral_decision",
+      "question": "I must decide whether to keep the patient here or refer urgently. The issue is OpenRouter model choice for on-device iOS RAG. What do the documents say?",
+      "answer": "This cannot be answered from the supplied documents. The clinical document set does not contain mobile-app engineering or OpenRouter configuration guidance.",
+      "source_of_truth": "Not in corpus."
+    },
+    {
+      "id": 74,
+      "category": "Unanswerable",
+      "topic": "OpenRouter model choice for on-device iOS RAG",
+      "question_template": "doctor_on_call",
+      "question": "The on-call doctor phones and asks about OpenRouter model choice for on-device iOS RAG. What is the evidence-based answer from our documents?",
+      "answer": "This cannot be answered from the supplied documents. The clinical document set does not contain mobile-app engineering or OpenRouter configuration guidance.",
+      "source_of_truth": "Not in corpus."
+    },
+    {
+      "id": 75,
+      "category": "Unanswerable",
+      "topic": "PNG health worker salary grades",
+      "question_template": "night_shift_worker",
+      "question": "On night shift at the health centre, I encounter this situation: PNG health worker salary grades. What should I do according to the guideline?",
+      "answer": "This cannot be answered from the supplied documents. None of the 14 clinical documents include health workforce pay scales or salary grades.",
+      "source_of_truth": "Not in corpus."
+    },
+    {
+      "id": 76,
+      "category": "Unanswerable",
+      "topic": "PNG health worker salary grades",
+      "question_template": "parent_counselling",
+      "question": "A worried parent asks me about PNG health worker salary grades. What is the correct guidance I should give?",
+      "answer": "This cannot be answered from the supplied documents. None of the 14 clinical documents include health workforce pay scales or salary grades.",
+      "source_of_truth": "Not in corpus."
+    },
+    {
+      "id": 77,
+      "category": "Unanswerable",
+      "topic": "COVID-19 paediatric antiviral treatment protocol",
+      "question_template": "referral_decision",
+      "question": "I must decide whether to keep the patient here or refer urgently. The issue is COVID-19 paediatric antiviral treatment protocol. What do the documents say?",
+      "answer": "This cannot be answered from the supplied documents. COVID-19 is mentioned only in passing (for example TB/BCG context) and no paediatric COVID-19 antiviral treatment protocol is provided.",
+      "source_of_truth": "Not in corpus."
+    },
+    {
+      "id": 78,
+      "category": "Unanswerable",
+      "topic": "COVID-19 paediatric antiviral treatment protocol",
+      "question_template": "doctor_on_call",
+      "question": "The on-call doctor phones and asks about COVID-19 paediatric antiviral treatment protocol. What is the evidence-based answer from our documents?",
+      "answer": "This cannot be answered from the supplied documents. COVID-19 is mentioned only in passing (for example TB/BCG context) and no paediatric COVID-19 antiviral treatment protocol is provided.",
+      "source_of_truth": "Not in corpus."
+    },
+    {
+      "id": 79,
+      "category": "Unanswerable",
+      "topic": "Medical evacuation airline contract for remote PNG",
+      "question_template": "night_shift_worker",
+      "question": "On night shift at the health centre, I encounter this situation: Medical evacuation airline contract for remote PNG. What should I do according to the guideline?",
+      "answer": "This cannot be answered from the supplied documents. Referral and transfer are discussed clinically, but no aeromedical evacuation airline contracts or vendor names are listed.",
+      "source_of_truth": "Not in corpus."
+    },
+    {
+      "id": 80,
+      "category": "Unanswerable",
+      "topic": "Medical evacuation airline contract for remote PNG",
+      "question_template": "parent_counselling",
+      "question": "A worried parent asks me about Medical evacuation airline contract for remote PNG. What is the correct guidance I should give?",
+      "answer": "This cannot be answered from the supplied documents. Referral and transfer are discussed clinically, but no aeromedical evacuation airline contracts or vendor names are listed.",
+      "source_of_truth": "Not in corpus."
+    },
+    {
+      "id": 81,
+      "category": "Unanswerable",
+      "topic": "Retail price of snake antivenom in Kina",
+      "question_template": "referral_decision",
+      "question": "I must decide whether to keep the patient here or refer urgently. The issue is Retail price of snake antivenom in Kina. What do the documents say?",
+      "answer": "This cannot be answered from the supplied documents. Snake-bite management is covered clinically, but drug pricing or procurement costs are not documented.",
+      "source_of_truth": "Not in corpus."
+    },
+    {
+      "id": 82,
+      "category": "Unanswerable",
+      "topic": "Retail price of snake antivenom in Kina",
+      "question_template": "doctor_on_call",
+      "question": "The on-call doctor phones and asks about Retail price of snake antivenom in Kina. What is the evidence-based answer from our documents?",
+      "answer": "This cannot be answered from the supplied documents. Snake-bite management is covered clinically, but drug pricing or procurement costs are not documented.",
+      "source_of_truth": "Not in corpus."
+    },
+    {
+      "id": 83,
+      "category": "Unanswerable",
+      "topic": "WhatsApp telemedicine consent policy",
+      "question_template": "night_shift_worker",
+      "question": "On night shift at the health centre, I encounter this situation: WhatsApp telemedicine consent policy. What should I do according to the guideline?",
+      "answer": "This cannot be answered from the supplied documents. The corpus contains no telemedicine platform policies or WhatsApp consent standards.",
+      "source_of_truth": "Not in corpus."
+    },
+    {
+      "id": 84,
+      "category": "Unanswerable",
+      "topic": "WhatsApp telemedicine consent policy",
+      "question_template": "parent_counselling",
+      "question": "A worried parent asks me about WhatsApp telemedicine consent policy. What is the correct guidance I should give?",
+      "answer": "This cannot be answered from the supplied documents. The corpus contains no telemedicine platform policies or WhatsApp consent standards.",
+      "source_of_truth": "Not in corpus."
+    },
+    {
+      "id": 85,
+      "category": "Unanswerable",
+      "topic": "Paediatric brain tumour MRI contrast protocol",
+      "question_template": "referral_decision",
+      "question": "I must decide whether to keep the patient here or refer urgently. The issue is Paediatric brain tumour MRI contrast protocol. What do the documents say?",
+      "answer": "This cannot be answered from the supplied documents. Imaging protocols for paediatric brain tumours are not included in the supplied PNG/WHO clinical guidance set.",
+      "source_of_truth": "Not in corpus."
+    },
+    {
+      "id": 86,
+      "category": "Unanswerable",
+      "topic": "Paediatric brain tumour MRI contrast protocol",
+      "question_template": "doctor_on_call",
+      "question": "The on-call doctor phones and asks about Paediatric brain tumour MRI contrast protocol. What is the evidence-based answer from our documents?",
+      "answer": "This cannot be answered from the supplied documents. Imaging protocols for paediatric brain tumours are not included in the supplied PNG/WHO clinical guidance set.",
+      "source_of_truth": "Not in corpus."
+    },
+    {
+      "id": 87,
+      "category": "Unanswerable",
+      "topic": "Hepatitis C direct-acting antiviral first-line regimen for PNG",
+      "question_template": "night_shift_worker",
+      "question": "On night shift at the health centre, I encounter this situation: Hepatitis C direct-acting antiviral first-line regimen for PNG. What should I do according to the guideline?",
+      "answer": "This cannot be answered from the supplied documents. Hepatitis C is referenced in HIV co-infection context, but no complete PNG first-line HCV DAA regimen is provided.",
+      "source_of_truth": "Not in corpus."
+    },
+    {
+      "id": 88,
+      "category": "Unanswerable",
+      "topic": "Hepatitis C direct-acting antiviral first-line regimen for PNG",
+      "question_template": "parent_counselling",
+      "question": "A worried parent asks me about Hepatitis C direct-acting antiviral first-line regimen for PNG. What is the correct guidance I should give?",
+      "answer": "This cannot be answered from the supplied documents. Hepatitis C is referenced in HIV co-infection context, but no complete PNG first-line HCV DAA regimen is provided.",
+      "source_of_truth": "Not in corpus."
+    },
+    {
+      "id": 89,
+      "category": "Unanswerable",
+      "topic": "Mpox ward negative-pressure airflow requirements",
+      "question_template": "referral_decision",
+      "question": "I must decide whether to keep the patient here or refer urgently. The issue is Mpox ward negative-pressure airflow requirements. What do the documents say?",
+      "answer": "This cannot be answered from the supplied documents. Mpox/monkeypox isolation engineering specifications are not covered in the Pacific outbreak or hospital-care manuals supplied.",
+      "source_of_truth": "Not in corpus."
+    },
+    {
+      "id": 90,
+      "category": "Unanswerable",
+      "topic": "Mpox ward negative-pressure airflow requirements",
+      "question_template": "doctor_on_call",
+      "question": "The on-call doctor phones and asks about Mpox ward negative-pressure airflow requirements. What is the evidence-based answer from our documents?",
+      "answer": "This cannot be answered from the supplied documents. Mpox/monkeypox isolation engineering specifications are not covered in the Pacific outbreak or hospital-care manuals supplied.",
+      "source_of_truth": "Not in corpus."
+    },
+    {
+      "id": 91,
+      "category": "Unanswerable",
+      "topic": "Blockchain patient records for aid posts",
+      "question_template": "night_shift_worker",
+      "question": "On night shift at the health centre, I encounter this situation: Blockchain patient records for aid posts. What should I do according to the guideline?",
+      "answer": "This cannot be answered from the supplied documents. Health information system architecture and blockchain implementations are outside the clinical corpus.",
+      "source_of_truth": "Not in corpus."
+    },
+    {
+      "id": 92,
+      "category": "Unanswerable",
+      "topic": "Blockchain patient records for aid posts",
+      "question_template": "parent_counselling",
+      "question": "A worried parent asks me about Blockchain patient records for aid posts. What is the correct guidance I should give?",
+      "answer": "This cannot be answered from the supplied documents. Health information system architecture and blockchain implementations are outside the clinical corpus.",
+      "source_of_truth": "Not in corpus."
+    },
+    {
+      "id": 93,
+      "category": "Unanswerable",
+      "topic": "Expected iPhone battery life for offline mobile RAG",
+      "question_template": "referral_decision",
+      "question": "I must decide whether to keep the patient here or refer urgently. The issue is Expected iPhone battery life for offline mobile RAG. What do the documents say?",
+      "answer": "This cannot be answered from the supplied documents. Mobile hardware performance and battery-life estimates for on-device RAG are not clinical content in the corpus.",
+      "source_of_truth": "Not in corpus."
+    },
+    {
+      "id": 94,
+      "category": "Unanswerable",
+      "topic": "Expected iPhone battery life for offline mobile RAG",
+      "question_template": "doctor_on_call",
+      "question": "The on-call doctor phones and asks about Expected iPhone battery life for offline mobile RAG. What is the evidence-based answer from our documents?",
+      "answer": "This cannot be answered from the supplied documents. Mobile hardware performance and battery-life estimates for on-device RAG are not clinical content in the corpus.",
+      "source_of_truth": "Not in corpus."
+    },
+    {
+      "id": 95,
+      "category": "Unanswerable",
+      "topic": "PNG national cancer registry hotline number",
+      "question_template": "night_shift_worker",
+      "question": "On night shift at the health centre, I encounter this situation: PNG national cancer registry hotline number. What should I do according to the guideline?",
+      "answer": "This cannot be answered from the supplied documents. Cancer care is mentioned in general terms, but no national cancer registry telephone hotline is listed.",
+      "source_of_truth": "Not in corpus."
+    },
+    {
+      "id": 96,
+      "category": "Unanswerable",
+      "topic": "PNG national cancer registry hotline number",
+      "question_template": "parent_counselling",
+      "question": "A worried parent asks me about PNG national cancer registry hotline number. What is the correct guidance I should give?",
+      "answer": "This cannot be answered from the supplied documents. Cancer care is mentioned in general terms, but no national cancer registry telephone hotline is listed.",
+      "source_of_truth": "Not in corpus."
+    },
+    {
+      "id": 97,
+      "category": "Unanswerable",
+      "topic": "Zika virus vaccine for pregnant women",
+      "question_template": "referral_decision",
+      "question": "I must decide whether to keep the patient here or refer urgently. The issue is Zika virus vaccine for pregnant women. What do the documents say?",
+      "answer": "This cannot be answered from the supplied documents. Zika appears in outbreak differential lists, but no Zika vaccination recommendations for pregnant women are provided.",
+      "source_of_truth": "Not in corpus."
+    },
+    {
+      "id": 98,
+      "category": "Unanswerable",
+      "topic": "Zika virus vaccine for pregnant women",
+      "question_template": "doctor_on_call",
+      "question": "The on-call doctor phones and asks about Zika virus vaccine for pregnant women. What is the evidence-based answer from our documents?",
+      "answer": "This cannot be answered from the supplied documents. Zika appears in outbreak differential lists, but no Zika vaccination recommendations for pregnant women are provided.",
+      "source_of_truth": "Not in corpus."
+    },
+    {
+      "id": 99,
+      "category": "Unanswerable",
+      "topic": "Swift CoreML embedding quantization bit width",
+      "question_template": "night_shift_worker",
+      "question": "On night shift at the health centre, I encounter this situation: Swift CoreML embedding quantization bit width. What should I do according to the guideline?",
+      "answer": "This cannot be answered from the supplied documents. Software implementation details for Swift/CoreML embedding quantization are not part of the clinical document set.",
+      "source_of_truth": "Not in corpus."
+    },
+    {
+      "id": 100,
+      "category": "Unanswerable",
+      "topic": "Swift CoreML embedding quantization bit width",
+      "question_template": "parent_counselling",
+      "question": "A worried parent asks me about Swift CoreML embedding quantization bit width. What is the correct guidance I should give?",
+      "answer": "This cannot be answered from the supplied documents. Software implementation details for Swift/CoreML embedding quantization are not part of the clinical document set.",
+      "source_of_truth": "Not in corpus."
+    }
+  ],
+  "documents_considered": [
+    {
+      "id": 1,
+      "title": "Child Health for Nurses and Health Extension Officers in Papua New Guinea, 3rd ed. (2022)"
+    },
+    {
+      "id": 2,
+      "title": "Standard Treatment for Common Illnesses of Children in Papua New Guinea, 10th ed. (2016)"
+    },
+    {
+      "id": 3,
+      "title": "WHO Pocket Book of Hospital Care for Children, 2nd ed. (2013)"
+    },
+    {
+      "id": 4,
+      "title": "Paediatrics for Doctors in Papua New Guinea, 2nd ed. (2003)"
+    },
+    {
+      "id": 5,
+      "title": "WHO Oxygen Therapy for Children (2016)"
+    },
+    {
+      "id": 6,
+      "title": "Guidelines for use of Bubble-CPAP concentrators (2017)"
+    },
+    {
+      "id": 7,
+      "title": "Management of Severe Malnutrition chart"
+    },
+    {
+      "id": 8,
+      "title": "F-75 / F-100 Feeding Reference Cards"
+    },
+    {
+      "id": 9,
+      "title": "PNG National Guidelines for HIV Care and Treatment (2019)"
+    },
+    {
+      "id": 10,
+      "title": "NDoH Updated for Children - paediatric DTG update memo"
+    },
+    {
+      "id": 11,
+      "title": "Summary of PNG preferred first-line ART as of November 2021"
+    },
+    {
+      "id": 12,
+      "title": "WHO Operational Handbook on TB, Module 5: Children and Adolescents (2022)"
+    },
+    {
+      "id": 13,
+      "title": "Pacific Outbreak Manual, PPHSN (2016)"
+    },
+    {
+      "id": 14,
+      "title": "PNG Manual of Standard Managements in Obstetrics and Gynaecology, 7th ed. (2016; minor edits 2018)"
+    }
+  ],
+  "clinical_validity_limitation": "Answers are constrained to the supplied documents. Unanswerable items are intentional negative tests; a clinically plausible guess without corpus support should be scored incorrect. Have appropriate PNG clinical leads review drug-dose and treatment-regimen items before production use."
+}

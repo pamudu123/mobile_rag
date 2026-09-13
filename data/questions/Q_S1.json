@@ -1,0 +1,970 @@
+{
+  "metadata": {
+    "title": "FrontlineAI - 100 Clinically Grounded Health-Worker Questions & Answers",
+    "subtitle": "Papua New Guinea / WHO source-of-truth benchmark compiled from the 14 supplied clinical documents",
+    "purpose": "This is a source-grounded benchmark for evaluating a clinical AI/RAG system and for training/QA discussion. It is not a replacement for bedside assessment, current national policy, specialist advice, or local escalation pathways. Where the supplied documents conflict, newer and more specific guidance should take precedence. In particular, the 2021 paediatric ART updates supersede older HIV first-line details, and the 2022 WHO child/adolescent TB handbook is preferred over older TB material.",
+    "design": "The questions are written in simple, practical language similar to what nurses, HEOs, CHWs and doctors may ask. Answers are deliberately concise and auditable. Each answer names the source document and page/section used.",
+    "source_hierarchy": "1) Newer PNG/WHO updates for the exact topic; 2) PNG national standard-treatment guidance for local practice; 3) WHO technical guidance; 4) older PNG textbooks mainly as supporting context. The older 2003 paediatrics text was not allowed to override later treatment guidance."
+  },
+  "questions": [
+    {
+      "id": 1,
+      "category": "Triage",
+      "topic": "Emergency triage signs",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Emergency triage signs. What is the correct action or answer?",
+      "answer": "Obstructed or absent breathing, severe respiratory distress, central cyanosis, shock, coma/reduced consciousness, convulsions, or severe dehydration with diarrhoea require immediate emergency treatment.",
+      "source_of_truth": "WHO Pocket Book of Hospital Care for Children (2013), pp. 2-4."
+    },
+    {
+      "id": 2,
+      "category": "Triage",
+      "topic": "Emergency triage signs",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Emergency triage signs. What should I remember from the guideline?",
+      "answer": "Obstructed or absent breathing, severe respiratory distress, central cyanosis, shock, coma/reduced consciousness, convulsions, or severe dehydration with diarrhoea require immediate emergency treatment.",
+      "source_of_truth": "WHO Pocket Book of Hospital Care for Children (2013), pp. 2-4."
+    },
+    {
+      "id": 3,
+      "category": "Triage",
+      "topic": "Sick infant priority",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Sick infant priority. What is the correct action or answer?",
+      "answer": "Any sick infant under 2 months is a priority patient and should be assessed without unnecessary delay.",
+      "source_of_truth": "WHO Pocket Book of Hospital Care for Children (2013), pp. 3-4."
+    },
+    {
+      "id": 4,
+      "category": "Triage",
+      "topic": "Sick infant priority",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Sick infant priority. What should I remember from the guideline?",
+      "answer": "Any sick infant under 2 months is a priority patient and should be assessed without unnecessary delay.",
+      "source_of_truth": "WHO Pocket Book of Hospital Care for Children (2013), pp. 3-4."
+    },
+    {
+      "id": 5,
+      "category": "Triage",
+      "topic": "Young-infant danger signs",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Young-infant danger signs. What is the correct action or answer?",
+      "answer": "For infants under 2 months, danger signs include inability to suck/feed, RR >60/min, RR <20/min or apnoea, severe chest indrawing, central cyanosis, and very cold arms/legs.",
+      "source_of_truth": "PNG Standard Treatment for Common Illnesses of Children (2016), p. 13."
+    },
+    {
+      "id": 6,
+      "category": "Triage",
+      "topic": "Young-infant danger signs",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Young-infant danger signs. What should I remember from the guideline?",
+      "answer": "For infants under 2 months, danger signs include inability to suck/feed, RR >60/min, RR <20/min or apnoea, severe chest indrawing, central cyanosis, and very cold arms/legs.",
+      "source_of_truth": "PNG Standard Treatment for Common Illnesses of Children (2016), p. 13."
+    },
+    {
+      "id": 7,
+      "category": "Triage",
+      "topic": "Referral: fever and feeding",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Referral: fever and feeding. What is the correct action or answer?",
+      "answer": "A child with fever who is unable to feed meets an admission/referral criterion.",
+      "source_of_truth": "PNG Standard Treatment for Common Illnesses of Children (2016), p. 14."
+    },
+    {
+      "id": 8,
+      "category": "Triage",
+      "topic": "Referral: fever and feeding",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Referral: fever and feeding. What should I remember from the guideline?",
+      "answer": "A child with fever who is unable to feed meets an admission/referral criterion.",
+      "source_of_truth": "PNG Standard Treatment for Common Illnesses of Children (2016), p. 14."
+    },
+    {
+      "id": 9,
+      "category": "Triage",
+      "topic": "Referral: sudden paralysis",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Referral: sudden paralysis. What is the correct action or answer?",
+      "answer": "Sudden onset of paralysis is an urgent admission/referral criterion.",
+      "source_of_truth": "PNG Standard Treatment for Common Illnesses of Children (2016), pp. 14-15."
+    },
+    {
+      "id": 10,
+      "category": "Triage",
+      "topic": "Referral: sudden paralysis",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Referral: sudden paralysis. What should I remember from the guideline?",
+      "answer": "Sudden onset of paralysis is an urgent admission/referral criterion.",
+      "source_of_truth": "PNG Standard Treatment for Common Illnesses of Children (2016), pp. 14-15."
+    },
+    {
+      "id": 11,
+      "category": "Triage",
+      "topic": "Weight before treatment",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Weight before treatment. What is the correct action or answer?",
+      "answer": "Weigh every child, plot growth where possible, and use the measured weight for medicine dosing.",
+      "source_of_truth": "PNG Standard Treatment for Common Illnesses of Children (2016), p. 15."
+    },
+    {
+      "id": 12,
+      "category": "Triage",
+      "topic": "Weight before treatment",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Weight before treatment. What should I remember from the guideline?",
+      "answer": "Weigh every child, plot growth where possible, and use the measured weight for medicine dosing.",
+      "source_of_truth": "PNG Standard Treatment for Common Illnesses of Children (2016), p. 15."
+    },
+    {
+      "id": 13,
+      "category": "Triage",
+      "topic": "Oral medicines preferred",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Oral medicines preferred. What is the correct action or answer?",
+      "answer": "Use oral medicines where possible; injections are mainly for children who are very sick or cannot take oral treatment.",
+      "source_of_truth": "PNG Standard Treatment for Common Illnesses of Children (2016), pp. 7, 16."
+    },
+    {
+      "id": 14,
+      "category": "Triage",
+      "topic": "Oral medicines preferred",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Oral medicines preferred. What should I remember from the guideline?",
+      "answer": "Use oral medicines where possible; injections are mainly for children who are very sick or cannot take oral treatment.",
+      "source_of_truth": "PNG Standard Treatment for Common Illnesses of Children (2016), pp. 7, 16."
+    },
+    {
+      "id": 15,
+      "category": "Triage",
+      "topic": "No single antibiotic dose",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: No single antibiotic dose. What is the correct action or answer?",
+      "answer": "Do not give single doses of antibiotics as treatment.",
+      "source_of_truth": "PNG Standard Treatment for Common Illnesses of Children (2016), p. 16."
+    },
+    {
+      "id": 16,
+      "category": "Triage",
+      "topic": "No single antibiotic dose",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: No single antibiotic dose. What should I remember from the guideline?",
+      "answer": "Do not give single doses of antibiotics as treatment.",
+      "source_of_truth": "PNG Standard Treatment for Common Illnesses of Children (2016), p. 16."
+    },
+    {
+      "id": 17,
+      "category": "Oxygen",
+      "topic": "Oxygen threshold",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Oxygen threshold. What is the correct action or answer?",
+      "answer": "In most children, oxygen is indicated when SpO2 is below 90%, while considering altitude and clinical context.",
+      "source_of_truth": "WHO Oxygen Therapy for Children (2016), pp. 4-6, 15."
+    },
+    {
+      "id": 18,
+      "category": "Oxygen",
+      "topic": "Oxygen threshold",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Oxygen threshold. What should I remember from the guideline?",
+      "answer": "In most children, oxygen is indicated when SpO2 is below 90%, while considering altitude and clinical context.",
+      "source_of_truth": "WHO Oxygen Therapy for Children (2016), pp. 4-6, 15."
+    },
+    {
+      "id": 19,
+      "category": "Oxygen",
+      "topic": "Critical illness threshold",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Critical illness threshold. What is the correct action or answer?",
+      "answer": "During resuscitation in severe sepsis, severe anaemia, severe heart failure, brain injury or other critical illness, oxygen is advised when SpO2 is below 94%.",
+      "source_of_truth": "WHO Oxygen Therapy for Children (2016), p. 4."
+    },
+    {
+      "id": 20,
+      "category": "Oxygen",
+      "topic": "Critical illness threshold",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Critical illness threshold. What should I remember from the guideline?",
+      "answer": "During resuscitation in severe sepsis, severe anaemia, severe heart failure, brain injury or other critical illness, oxygen is advised when SpO2 is below 94%.",
+      "source_of_truth": "WHO Oxygen Therapy for Children (2016), p. 4."
+    },
+    {
+      "id": 21,
+      "category": "Oxygen",
+      "topic": "Clinical signs of hypoxaemia",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Clinical signs of hypoxaemia. What is the correct action or answer?",
+      "answer": "If oximetry is unavailable, central cyanosis, nasal flaring, inability to drink/feed due to respiratory distress, grunting every breath and depressed mental state support oxygen use; severe indrawing, RR >=70/min or head nodding may also indicate need.",
+      "source_of_truth": "WHO Oxygen Therapy for Children (2016), pp. 9-10, 15."
+    },
+    {
+      "id": 22,
+      "category": "Oxygen",
+      "topic": "Clinical signs of hypoxaemia",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Clinical signs of hypoxaemia. What should I remember from the guideline?",
+      "answer": "If oximetry is unavailable, central cyanosis, nasal flaring, inability to drink/feed due to respiratory distress, grunting every breath and depressed mental state support oxygen use; severe indrawing, RR >=70/min or head nodding may also indicate need.",
+      "source_of_truth": "WHO Oxygen Therapy for Children (2016), pp. 9-10, 15."
+    },
+    {
+      "id": 23,
+      "category": "Oxygen",
+      "topic": "Pulse oximetry preferred",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Pulse oximetry preferred. What is the correct action or answer?",
+      "answer": "Pulse oximetry is the preferred non-invasive method for detecting and monitoring hypoxaemia; clinical signs alone can miss cases.",
+      "source_of_truth": "WHO Oxygen Therapy for Children (2016), pp. 9-10, 14."
+    },
+    {
+      "id": 24,
+      "category": "Oxygen",
+      "topic": "Pulse oximetry preferred",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Pulse oximetry preferred. What should I remember from the guideline?",
+      "answer": "Pulse oximetry is the preferred non-invasive method for detecting and monitoring hypoxaemia; clinical signs alone can miss cases.",
+      "source_of_truth": "WHO Oxygen Therapy for Children (2016), pp. 9-10, 14."
+    },
+    {
+      "id": 25,
+      "category": "Oxygen",
+      "topic": "Newborn saturation",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Newborn saturation. What is the correct action or answer?",
+      "answer": "In the first hour after birth, normal oxygen saturation is lower and may take an hour or more to reach 90% or above.",
+      "source_of_truth": "WHO Oxygen Therapy for Children (2016), pp. 7-8."
+    },
+    {
+      "id": 26,
+      "category": "Oxygen",
+      "topic": "Newborn saturation",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Newborn saturation. What should I remember from the guideline?",
+      "answer": "In the first hour after birth, normal oxygen saturation is lower and may take an hour or more to reach 90% or above.",
+      "source_of_truth": "WHO Oxygen Therapy for Children (2016), pp. 7-8. CPAP"
+    },
+    {
+      "id": 27,
+      "category": "CPAP",
+      "topic": "When to consider CPAP",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: When to consider CPAP. What is the correct action or answer?",
+      "answer": "Consider CPAP when severe respiratory distress persists despite oxygen or severe hypoxaemia persists, especially SpO2 <85% despite high-flow oxygen.",
+      "source_of_truth": "Bubble-CPAP Guidelines (2017), pp. 2-3."
+    },
+    {
+      "id": 28,
+      "category": "CPAP",
+      "topic": "When to consider CPAP",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: When to consider CPAP. What should I remember from the guideline?",
+      "answer": "Consider CPAP when severe respiratory distress persists despite oxygen or severe hypoxaemia persists, especially SpO2 <85% despite high-flow oxygen.",
+      "source_of_truth": "Bubble-CPAP Guidelines (2017), pp. 2-3."
+    },
+    {
+      "id": 29,
+      "category": "CPAP",
+      "topic": "CPAP contraindication",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: CPAP contraindication. What is the correct action or answer?",
+      "answer": "Do not use CPAP in pneumothorax because it can worsen the air leak.",
+      "source_of_truth": "Bubble-CPAP Guidelines (2017), p. 2."
+    },
+    {
+      "id": 30,
+      "category": "CPAP",
+      "topic": "CPAP contraindication",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: CPAP contraindication. What should I remember from the guideline?",
+      "answer": "Do not use CPAP in pneumothorax because it can worsen the air leak.",
+      "source_of_truth": "Bubble-CPAP Guidelines (2017), p. 2."
+    },
+    {
+      "id": 31,
+      "category": "CPAP",
+      "topic": "CPAP requires breathing",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: CPAP requires breathing. What is the correct action or answer?",
+      "answer": "CPAP will not be effective in an unconscious child who is not taking spontaneous breaths.",
+      "source_of_truth": "Bubble-CPAP Guidelines (2017), pp. 2-3."
+    },
+    {
+      "id": 32,
+      "category": "CPAP",
+      "topic": "CPAP requires breathing",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: CPAP requires breathing. What should I remember from the guideline?",
+      "answer": "CPAP will not be effective in an unconscious child who is not taking spontaneous breaths.",
+      "source_of_truth": "Bubble-CPAP Guidelines (2017), pp. 2-3."
+    },
+    {
+      "id": 33,
+      "category": "CPAP",
+      "topic": "Initial CPAP setting",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Initial CPAP setting. What is the correct action or answer?",
+      "answer": "The bubble-CPAP concentrator guideline starts CPAP at 7 cmH2O and then adjusts according to distress, SpO2 and bubbling.",
+      "source_of_truth": "Bubble-CPAP Guidelines (2017), pp. 5-6."
+    },
+    {
+      "id": 34,
+      "category": "CPAP",
+      "topic": "Initial CPAP setting",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Initial CPAP setting. What should I remember from the guideline?",
+      "answer": "The bubble-CPAP concentrator guideline starts CPAP at 7 cmH2O and then adjusts according to distress, SpO2 and bubbling.",
+      "source_of_truth": "Bubble-CPAP Guidelines (2017), pp. 5-6."
+    },
+    {
+      "id": 35,
+      "category": "CPAP",
+      "topic": "Trial off CPAP",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Trial off CPAP. What is the correct action or answer?",
+      "answer": "A trial off CPAP is reasonable when clinically stable with a low respiratory-distress score and SpO2 >92%, with close observation.",
+      "source_of_truth": "Bubble-CPAP Guidelines (2017), pp. 7-8."
+    },
+    {
+      "id": 36,
+      "category": "CPAP",
+      "topic": "Trial off CPAP",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Trial off CPAP. What should I remember from the guideline?",
+      "answer": "A trial off CPAP is reasonable when clinically stable with a low respiratory-distress score and SpO2 >92%, with close observation.",
+      "source_of_truth": "Bubble-CPAP Guidelines (2017), pp. 7-8."
+    },
+    {
+      "id": 37,
+      "category": "Nutrition",
+      "topic": "Diarrhoea assessment",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Diarrhoea assessment. What is the correct action or answer?",
+      "answer": "In a child with diarrhoea, first classify dehydration severity and check danger signs; management differs for severe, some or no dehydration.",
+      "source_of_truth": "WHO Pocket Book of Hospital Care for Children (2013), pp. 125-138; PNG Standard Treatment Book (2016), pp. 48-59."
+    },
+    {
+      "id": 38,
+      "category": "Nutrition",
+      "topic": "Diarrhoea assessment",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Diarrhoea assessment. What should I remember from the guideline?",
+      "answer": "In a child with diarrhoea, first classify dehydration severity and check danger signs; management differs for severe, some or no dehydration.",
+      "source_of_truth": "WHO Pocket Book of Hospital Care for Children (2013), pp. 125-138; PNG Standard Treatment Book (2016), pp. 48-59."
+    },
+    {
+      "id": 39,
+      "category": "Nutrition",
+      "topic": "Outbreak diarrhoea definition",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Outbreak diarrhoea definition. What is the correct action or answer?",
+      "answer": "For syndromic surveillance, diarrhoea is three or more loose or watery stools in 24 hours.",
+      "source_of_truth": "Pacific Outbreak Manual (2016), p. 21."
+    },
+    {
+      "id": 40,
+      "category": "Nutrition",
+      "topic": "Outbreak diarrhoea definition",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Outbreak diarrhoea definition. What should I remember from the guideline?",
+      "answer": "For syndromic surveillance, diarrhoea is three or more loose or watery stools in 24 hours.",
+      "source_of_truth": "Pacific Outbreak Manual (2016), p. 21."
+    },
+    {
+      "id": 41,
+      "category": "Nutrition",
+      "topic": "Dysentery cluster",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Dysentery cluster. What is the correct action or answer?",
+      "answer": "Three or more linked cases of bloody diarrhoea should trigger an outbreak investigation.",
+      "source_of_truth": "Pacific Outbreak Manual (2016), pp. 14, 21-22."
+    },
+    {
+      "id": 42,
+      "category": "Nutrition",
+      "topic": "Dysentery cluster",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Dysentery cluster. What should I remember from the guideline?",
+      "answer": "Three or more linked cases of bloody diarrhoea should trigger an outbreak investigation.",
+      "source_of_truth": "Pacific Outbreak Manual (2016), pp. 14, 21-22."
+    },
+    {
+      "id": 43,
+      "category": "Nutrition",
+      "topic": "Severe malnutrition MUAC",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Severe malnutrition MUAC. What is the correct action or answer?",
+      "answer": "MUAC below 11.5 cm in a child over 6 months is a severe-malnutrition/admission criterion.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 14 and malnutrition section."
+    },
+    {
+      "id": 44,
+      "category": "Nutrition",
+      "topic": "Severe malnutrition MUAC",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Severe malnutrition MUAC. What should I remember from the guideline?",
+      "answer": "MUAC below 11.5 cm in a child over 6 months is a severe-malnutrition/admission criterion.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 14 and malnutrition section."
+    },
+    {
+      "id": 45,
+      "category": "Nutrition",
+      "topic": "Severe malnutrition priorities",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Severe malnutrition priorities. What is the correct action or answer?",
+      "answer": "Priorities include hypoglycaemia, hypothermia prevention, careful dehydration treatment, electrolytes/micronutrients, infection treatment, immediate therapeutic feeding, breastfeeding and monitoring.",
+      "source_of_truth": "Management of Severe Malnutrition chart; WHO Pocket Book (2013), Chapter 7."
+    },
+    {
+      "id": 46,
+      "category": "Nutrition",
+      "topic": "Severe malnutrition priorities",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Severe malnutrition priorities. What should I remember from the guideline?",
+      "answer": "Priorities include hypoglycaemia, hypothermia prevention, careful dehydration treatment, electrolytes/micronutrients, infection treatment, immediate therapeutic feeding, breastfeeding and monitoring.",
+      "source_of_truth": "Management of Severe Malnutrition chart; WHO Pocket Book (2013), Chapter 7."
+    },
+    {
+      "id": 47,
+      "category": "Nutrition",
+      "topic": "F-75 daily volume",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: F-75 daily volume. What is the correct action or answer?",
+      "answer": "The F-75 reference card uses approximately 130 mL/kg/day during initial feeding, divided into frequent feeds.",
+      "source_of_truth": "F-75 Reference Card, p. 1."
+    },
+    {
+      "id": 48,
+      "category": "Nutrition",
+      "topic": "F-75 daily volume",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: F-75 daily volume. What should I remember from the guideline?",
+      "answer": "The F-75 reference card uses approximately 130 mL/kg/day during initial feeding, divided into frequent feeds.",
+      "source_of_truth": "F-75 Reference Card, p. 1."
+    },
+    {
+      "id": 49,
+      "category": "Nutrition",
+      "topic": "5 kg F-75",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: 5 kg F-75. What is the correct action or answer?",
+      "answer": "For a 5.0 kg child, the F-75 card lists 80 mL every 3 hours (8 feeds), about 650 mL/day.",
+      "source_of_truth": "F-75 Reference Card, p. 1."
+    },
+    {
+      "id": 50,
+      "category": "Nutrition",
+      "topic": "5 kg F-75",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: 5 kg F-75. What should I remember from the guideline?",
+      "answer": "For a 5.0 kg child, the F-75 card lists 80 mL every 3 hours (8 feeds), about 650 mL/day.",
+      "source_of_truth": "F-75 Reference Card, p. 1."
+    },
+    {
+      "id": 51,
+      "category": "Nutrition",
+      "topic": "Iron timing in SAM",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Iron timing in SAM. What is the correct action or answer?",
+      "answer": "The PNG severe-malnutrition chart advises starting iron in the second week of treatment.",
+      "source_of_truth": "Management of Severe Malnutrition chart."
+    },
+    {
+      "id": 52,
+      "category": "Nutrition",
+      "topic": "Iron timing in SAM",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Iron timing in SAM. What should I remember from the guideline?",
+      "answer": "The PNG severe-malnutrition chart advises starting iron in the second week of treatment.",
+      "source_of_truth": "Management of Severe Malnutrition chart."
+    },
+    {
+      "id": 53,
+      "category": "Newborn",
+      "topic": "Small baby care",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Small baby care. What is the correct action or answer?",
+      "answer": "For babies under 2.2 kg: keep warm, preferably skin-to-skin/KMC, and start breastfeeds within about 30-60 minutes; use expressed breast milk if sucking is poor.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 26."
+    },
+    {
+      "id": 54,
+      "category": "Newborn",
+      "topic": "Small baby care",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Small baby care. What should I remember from the guideline?",
+      "answer": "For babies under 2.2 kg: keep warm, preferably skin-to-skin/KMC, and start breastfeeds within about 30-60 minutes; use expressed breast milk if sucking is poor.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 26."
+    },
+    {
+      "id": 55,
+      "category": "Newborn",
+      "topic": "Small baby weight gain",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Small baby weight gain. What is the correct action or answer?",
+      "answer": "Satisfactory weight gain for a small baby is about 20 g/day or 100-150 g/week.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 27."
+    },
+    {
+      "id": 56,
+      "category": "Newborn",
+      "topic": "Small baby weight gain",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Small baby weight gain. What should I remember from the guideline?",
+      "answer": "Satisfactory weight gain for a small baby is about 20 g/day or 100-150 g/week.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 27."
+    },
+    {
+      "id": 57,
+      "category": "Newborn",
+      "topic": "Neonatal infection signs",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Neonatal infection signs. What is the correct action or answer?",
+      "answer": "Possible neonatal infection signs include fever/hypothermia, poor suck, distension, vomiting all feeds, fits, pustules, jaundice, infected cord, RR >60, apnoea, severe indrawing, cyanosis, prolonged membrane rupture, maternal fever or offensive liquor.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 28."
+    },
+    {
+      "id": 58,
+      "category": "Newborn",
+      "topic": "Neonatal infection signs",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Neonatal infection signs. What should I remember from the guideline?",
+      "answer": "Possible neonatal infection signs include fever/hypothermia, poor suck, distension, vomiting all feeds, fits, pustules, jaundice, infected cord, RR >60, apnoea, severe indrawing, cyanosis, prolonged membrane rupture, maternal fever or offensive liquor.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 28."
+    },
+    {
+      "id": 59,
+      "category": "Newborn",
+      "topic": "Neonatal antibiotics",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Neonatal antibiotics. What is the correct action or answer?",
+      "answer": "The PNG manual uses ampicillin (or penicillin/crystapen) plus gentamicin as initial treatment for suspected neonatal infection, using neonatal dose tables.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), pp. 28-31."
+    },
+    {
+      "id": 60,
+      "category": "Newborn",
+      "topic": "Neonatal antibiotics",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Neonatal antibiotics. What should I remember from the guideline?",
+      "answer": "The PNG manual uses ampicillin (or penicillin/crystapen) plus gentamicin as initial treatment for suspected neonatal infection, using neonatal dose tables.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), pp. 28-31."
+    },
+    {
+      "id": 61,
+      "category": "Newborn",
+      "topic": "Early breastfeeding",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Early breastfeeding. What is the correct action or answer?",
+      "answer": "Breastfeeding should begin as early as possible, ideally within the first hour; colostrum should be given.",
+      "source_of_truth": "Child Health for Nurses and HEOs in PNG (2022), pp. 28-30."
+    },
+    {
+      "id": 62,
+      "category": "Newborn",
+      "topic": "Early breastfeeding",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Early breastfeeding. What should I remember from the guideline?",
+      "answer": "Breastfeeding should begin as early as possible, ideally within the first hour; colostrum should be given.",
+      "source_of_truth": "Child Health for Nurses and HEOs in PNG (2022), pp. 28-30."
+    },
+    {
+      "id": 63,
+      "category": "Development",
+      "topic": "Developmental delay",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Developmental delay. What is the correct action or answer?",
+      "answer": "Suspected developmental delay should be referred for paediatric assessment; hearing loss is one possible treatable contributor to delayed speech.",
+      "source_of_truth": "Child Health for Nurses and HEOs in PNG (2022), p. 27."
+    },
+    {
+      "id": 64,
+      "category": "Development",
+      "topic": "Developmental delay",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Developmental delay. What should I remember from the guideline?",
+      "answer": "Suspected developmental delay should be referred for paediatric assessment; hearing loss is one possible treatable contributor to delayed speech.",
+      "source_of_truth": "Child Health for Nurses and HEOs in PNG (2022), p. 27."
+    },
+    {
+      "id": 65,
+      "category": "Anaemia",
+      "topic": "Child anaemia definition",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Child anaemia definition. What is the correct action or answer?",
+      "answer": "The PNG child treatment manual defines anaemia as haemoglobin below 10 g/dL.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 17."
+    },
+    {
+      "id": 66,
+      "category": "Anaemia",
+      "topic": "Child anaemia definition",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Child anaemia definition. What should I remember from the guideline?",
+      "answer": "The PNG child treatment manual defines anaemia as haemoglobin below 10 g/dL.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 17."
+    },
+    {
+      "id": 67,
+      "category": "Anaemia",
+      "topic": "Child transfusion threshold",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Child transfusion threshold. What is the correct action or answer?",
+      "answer": "Transfuse any child with Hb <3 g/dL; at Hb 3-6 g/dL transfuse when severe infection, heart failure or kwashiorkor is present.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 18."
+    },
+    {
+      "id": 68,
+      "category": "Anaemia",
+      "topic": "Child transfusion threshold",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Child transfusion threshold. What should I remember from the guideline?",
+      "answer": "Transfuse any child with Hb <3 g/dL; at Hb 3-6 g/dL transfuse when severe infection, heart failure or kwashiorkor is present.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 18."
+    },
+    {
+      "id": 69,
+      "category": "Anaemia",
+      "topic": "Persistent anaemia",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Persistent anaemia. What is the correct action or answer?",
+      "answer": "Persistent or recurrent anaemia should be referred for investigation; repeated iron can be inappropriate in conditions such as thalassaemia.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 18."
+    },
+    {
+      "id": 70,
+      "category": "Anaemia",
+      "topic": "Persistent anaemia",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Persistent anaemia. What should I remember from the guideline?",
+      "answer": "Persistent or recurrent anaemia should be referred for investigation; repeated iron can be inappropriate in conditions such as thalassaemia.",
+      "source_of_truth": "PNG Standard Treatment Book (2016), p. 18. HIV"
+    },
+    {
+      "id": 71,
+      "category": "HIV",
+      "topic": "Test and treat",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Test and treat. What is the correct action or answer?",
+      "answer": "PNG 2019 HIV guidance says to initiate ART in all people living with HIV regardless of WHO stage or CD4 count.",
+      "source_of_truth": "PNG National HIV Care and Treatment Guidelines (2019), p. 9."
+    },
+    {
+      "id": 72,
+      "category": "HIV",
+      "topic": "Test and treat",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Test and treat. What should I remember from the guideline?",
+      "answer": "PNG 2019 HIV guidance says to initiate ART in all people living with HIV regardless of WHO stage or CD4 count.",
+      "source_of_truth": "PNG National HIV Care and Treatment Guidelines (2019), p. 9."
+    },
+    {
+      "id": 73,
+      "category": "HIV",
+      "topic": "2019 first line >=30 kg",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: 2019 first line >=30 kg. What is the correct action or answer?",
+      "answer": "The 2019 preferred first-line regimen for adults/adolescents and children >=30 kg is TDF + 3TC + DTG.",
+      "source_of_truth": "PNG National HIV Care and Treatment Guidelines (2019), pp. 11-12."
+    },
+    {
+      "id": 74,
+      "category": "HIV",
+      "topic": "2019 first line >=30 kg",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: 2019 first line >=30 kg. What should I remember from the guideline?",
+      "answer": "The 2019 preferred first-line regimen for adults/adolescents and children >=30 kg is TDF + 3TC + DTG.",
+      "source_of_truth": "PNG National HIV Care and Treatment Guidelines (2019), pp. 11-12."
+    },
+    {
+      "id": 75,
+      "category": "HIV",
+      "topic": "Updated paediatric DTG",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Updated paediatric DTG. What is the correct action or answer?",
+      "answer": "The later NDoH child update introduces DTG 10 mg scored dispersible tablets for children older than 4 weeks and at least 3 kg, with weight-band dosing.",
+      "source_of_truth": "NDoH Updated for Children memo (adapted from WHO July 2021 recommendations), Table 2."
+    },
+    {
+      "id": 76,
+      "category": "HIV",
+      "topic": "Updated paediatric DTG",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Updated paediatric DTG. What should I remember from the guideline?",
+      "answer": "The later NDoH child update introduces DTG 10 mg scored dispersible tablets for children older than 4 weeks and at least 3 kg, with weight-band dosing.",
+      "source_of_truth": "NDoH Updated for Children memo (adapted from WHO July 2021 recommendations), Table 2."
+    },
+    {
+      "id": 77,
+      "category": "HIV",
+      "topic": "2021 preferred child first line",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: 2021 preferred child first line. What is the correct action or answer?",
+      "answer": "The November 2021 PNG summary shows ABC/3TC + DTG-based first-line treatment for children below 30 kg, using weight-appropriate DTG formulations; >=30 kg transitions to TDF/3TC/DTG.",
+      "source_of_truth": "Summary of PNG preferred first-line ART as of Nov 2021."
+    },
+    {
+      "id": 78,
+      "category": "HIV",
+      "topic": "2021 preferred child first line",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: 2021 preferred child first line. What should I remember from the guideline?",
+      "answer": "The November 2021 PNG summary shows ABC/3TC + DTG-based first-line treatment for children below 30 kg, using weight-appropriate DTG formulations; >=30 kg transitions to TDF/3TC/DTG.",
+      "source_of_truth": "Summary of PNG preferred first-line ART as of Nov 2021."
+    },
+    {
+      "id": 79,
+      "category": "HIV",
+      "topic": "PEP timing",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: PEP timing. What is the correct action or answer?",
+      "answer": "PEP should start as soon as possible, ideally within 24 hours, and can be started up to 72 hours after exposure; the 2019 course is 28 days.",
+      "source_of_truth": "PNG National HIV Care and Treatment Guidelines (2019), p. 21."
+    },
+    {
+      "id": 80,
+      "category": "HIV",
+      "topic": "PEP timing",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: PEP timing. What should I remember from the guideline?",
+      "answer": "PEP should start as soon as possible, ideally within 24 hours, and can be started up to 72 hours after exposure; the 2019 course is 28 days.",
+      "source_of_truth": "PNG National HIV Care and Treatment Guidelines (2019), p. 21."
+    },
+    {
+      "id": 81,
+      "category": "HIV",
+      "topic": "Infant prophylaxis risk",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Infant prophylaxis risk. What is the correct action or answer?",
+      "answer": "High-risk HIV-exposed infants receive AZT + NVP for 6 weeks then NVP for another 6 weeks; low-risk infants receive NVP for 6 weeks, per the 2019 PNG guideline.",
+      "source_of_truth": "PNG National HIV Care and Treatment Guidelines (2019), p. 19."
+    },
+    {
+      "id": 82,
+      "category": "HIV",
+      "topic": "Infant prophylaxis risk",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Infant prophylaxis risk. What should I remember from the guideline?",
+      "answer": "High-risk HIV-exposed infants receive AZT + NVP for 6 weeks then NVP for another 6 weeks; low-risk infants receive NVP for 6 weeks, per the 2019 PNG guideline.",
+      "source_of_truth": "PNG National HIV Care and Treatment Guidelines (2019), p. 19."
+    },
+    {
+      "id": 83,
+      "category": "HIV",
+      "topic": "Cotrimoxazole prevention",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Cotrimoxazole prevention. What is the correct action or answer?",
+      "answer": "The 2019 PNG HIV guideline states all diagnosed PLHIV are eligible for cotrimoxazole preventive therapy and it should be continued lifelong.",
+      "source_of_truth": "PNG National HIV Care and Treatment Guidelines (2019), p. 20."
+    },
+    {
+      "id": 84,
+      "category": "HIV",
+      "topic": "Cotrimoxazole prevention",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Cotrimoxazole prevention. What should I remember from the guideline?",
+      "answer": "The 2019 PNG HIV guideline states all diagnosed PLHIV are eligible for cotrimoxazole preventive therapy and it should be continued lifelong.",
+      "source_of_truth": "PNG National HIV Care and Treatment Guidelines (2019), p. 20. TB"
+    },
+    {
+      "id": 85,
+      "category": "TB",
+      "topic": "TB household contacts",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: TB household contacts. What is the correct action or answer?",
+      "answer": "Household and other close contacts of people with pulmonary TB should be systematically screened for TB disease.",
+      "source_of_truth": "WHO Operational Handbook on TB, Module 5 (2022), contact investigation section."
+    },
+    {
+      "id": 86,
+      "category": "TB",
+      "topic": "TB household contacts",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: TB household contacts. What should I remember from the guideline?",
+      "answer": "Household and other close contacts of people with pulmonary TB should be systematically screened for TB disease.",
+      "source_of_truth": "WHO Operational Handbook on TB, Module 5 (2022), contact investigation section."
+    },
+    {
+      "id": 87,
+      "category": "TB",
+      "topic": "TB/HIV testing",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: TB/HIV testing. What is the correct action or answer?",
+      "answer": "Routine HIV testing should be offered to all children/adolescents completing evaluation for TB exposure, with presumptive TB or diagnosed TB.",
+      "source_of_truth": "WHO Operational Handbook on TB, Module 5 (2022), p. 71."
+    },
+    {
+      "id": 88,
+      "category": "TB",
+      "topic": "TB/HIV testing",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: TB/HIV testing. What should I remember from the guideline?",
+      "answer": "Routine HIV testing should be offered to all children/adolescents completing evaluation for TB exposure, with presumptive TB or diagnosed TB.",
+      "source_of_truth": "WHO Operational Handbook on TB, Module 5 (2022), p. 71."
+    },
+    {
+      "id": 89,
+      "category": "TB",
+      "topic": "CXR limitation",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: CXR limitation. What is the correct action or answer?",
+      "answer": "A chest X-ray alone cannot determine the correct TB treatment in a child; it supports diagnosis and helps assess disease extent/duration.",
+      "source_of_truth": "WHO Operational Handbook on TB, Module 5 (2022), p. 71."
+    },
+    {
+      "id": 90,
+      "category": "TB",
+      "topic": "CXR limitation",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: CXR limitation. What should I remember from the guideline?",
+      "answer": "A chest X-ray alone cannot determine the correct TB treatment in a child; it supports diagnosis and helps assess disease extent/duration.",
+      "source_of_truth": "WHO Operational Handbook on TB, Module 5 (2022), p. 71."
+    },
+    {
+      "id": 91,
+      "category": "TB",
+      "topic": "TB and malnutrition",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: TB and malnutrition. What is the correct action or answer?",
+      "answer": "A child receiving therapeutic nutrition who is still not gaining weight should be evaluated for TB; severe malnutrition is an important TB risk factor.",
+      "source_of_truth": "WHO Operational Handbook on TB, Module 5 (2022), pp. 195-196."
+    },
+    {
+      "id": 92,
+      "category": "TB",
+      "topic": "TB and malnutrition",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: TB and malnutrition. What should I remember from the guideline?",
+      "answer": "A child receiving therapeutic nutrition who is still not gaining weight should be evaluated for TB; severe malnutrition is an important TB risk factor.",
+      "source_of_truth": "WHO Operational Handbook on TB, Module 5 (2022), pp. 195-196."
+    },
+    {
+      "id": 93,
+      "category": "Outbreak",
+      "topic": "Outbreak definition",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Outbreak definition. What is the correct action or answer?",
+      "answer": "An outbreak is an unexpected increase in cases above the expected baseline in a defined population and time; for some diseases one case is enough to trigger action.",
+      "source_of_truth": "Pacific Outbreak Manual (2016), p. 7."
+    },
+    {
+      "id": 94,
+      "category": "Outbreak",
+      "topic": "Outbreak definition",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Outbreak definition. What should I remember from the guideline?",
+      "answer": "An outbreak is an unexpected increase in cases above the expected baseline in a defined population and time; for some diseases one case is enough to trigger action.",
+      "source_of_truth": "Pacific Outbreak Manual (2016), p. 7."
+    },
+    {
+      "id": 95,
+      "category": "Outbreak",
+      "topic": "Outbreak response steps",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Outbreak response steps. What is the correct action or answer?",
+      "answer": "Core steps are: confirm outbreak, establish diagnosis, make a case definition, find cases, make a line list, describe/interpret data, implement control measures, and communicate findings.",
+      "source_of_truth": "Pacific Outbreak Manual (2016), pp. 7-12."
+    },
+    {
+      "id": 96,
+      "category": "Outbreak",
+      "topic": "Outbreak response steps",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Outbreak response steps. What should I remember from the guideline?",
+      "answer": "Core steps are: confirm outbreak, establish diagnosis, make a case definition, find cases, make a line list, describe/interpret data, implement control measures, and communicate findings.",
+      "source_of_truth": "Pacific Outbreak Manual (2016), pp. 7-12."
+    },
+    {
+      "id": 97,
+      "category": "Obstetrics",
+      "topic": "Antenatal BP referral",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Antenatal BP referral. What is the correct action or answer?",
+      "answer": "At antenatal visits, BP over 140/90 requires admission or referral for assessment of pre-eclampsia.",
+      "source_of_truth": "PNG O&G; Standard Management Manual, p. 15."
+    },
+    {
+      "id": 98,
+      "category": "Obstetrics",
+      "topic": "Antenatal BP referral",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Antenatal BP referral. What should I remember from the guideline?",
+      "answer": "At antenatal visits, BP over 140/90 requires admission or referral for assessment of pre-eclampsia.",
+      "source_of_truth": "PNG O&G; Standard Management Manual, p. 15."
+    },
+    {
+      "id": 99,
+      "category": "Obstetrics",
+      "topic": "Antepartum haemorrhage",
+      "question_template": "frontline_health_worker",
+      "question": "A frontline health worker asks: Antepartum haemorrhage. What is the correct action or answer?",
+      "answer": "Any vaginal bleeding after 20 weeks should be taken seriously; admit, avoid digital vaginal examination before labour unless in an equipped theatre, stabilize and arrange transfer as indicated.",
+      "source_of_truth": "PNG O&G; Standard Management Manual, pp. 18-19."
+    },
+    {
+      "id": 100,
+      "category": "Obstetrics",
+      "topic": "Antepartum haemorrhage",
+      "question_template": "busy_clinic",
+      "question": "During a busy clinic, I face this situation: Antepartum haemorrhage. What should I remember from the guideline?",
+      "answer": "Any vaginal bleeding after 20 weeks should be taken seriously; admit, avoid digital vaginal examination before labour unless in an equipped theatre, stabilize and arrange transfer as indicated.",
+      "source_of_truth": "PNG O&G; Standard Management Manual, pp. 18-19."
+    }
+  ],
+  "documents_considered": [
+    {
+      "id": 1,
+      "title": "Child Health for Nurses and Health Extension Officers in Papua New Guinea, 3rd ed. (2022)"
+    },
+    {
+      "id": 2,
+      "title": "Standard Treatment for Common Illnesses of Children in Papua New Guinea, 10th ed. (2016)"
+    },
+    {
+      "id": 3,
+      "title": "WHO Pocket Book of Hospital Care for Children, 2nd ed. (2013)"
+    },
+    {
+      "id": 4,
+      "title": "Paediatrics for Doctors in Papua New Guinea, 2nd ed. (2003)"
+    },
+    {
+      "id": 5,
+      "title": "WHO Oxygen Therapy for Children (2016)"
+    },
+    {
+      "id": 6,
+      "title": "Guidelines for use of Bubble-CPAP concentrators (2017)"
+    },
+    {
+      "id": 7,
+      "title": "Management of Severe Malnutrition chart"
+    },
+    {
+      "id": 8,
+      "title": "F-75 / F-100 Feeding Reference Cards"
+    },
+    {
+      "id": 9,
+      "title": "PNG National Guidelines for HIV Care and Treatment (2019)"
+    },
+    {
+      "id": 10,
+      "title": "NDoH Updated for Children - paediatric DTG update memo"
+    },
+    {
+      "id": 11,
+      "title": "Summary of PNG preferred first-line ART as of November 2021"
+    },
+    {
+      "id": 12,
+      "title": "WHO Operational Handbook on TB, Module 5: Children and Adolescents (2022)"
+    },
+    {
+      "id": 13,
+      "title": "Pacific Outbreak Manual, PPHSN (2016)"
+    },
+    {
+      "id": 14,
+      "title": "PNG Manual of Standard Managements in Obstetrics and Gynaecology, 7th ed. (2016; minor edits 2018)"
+    }
+  ],
+  "clinical_validity_limitation": "The answers are intentionally constrained to the supplied documents. Some documents are older and may have been superseded in real-world practice. Before treating this as a production clinical gold standard, have appropriate PNG clinical leads sign off the drug-dose and treatment-regimen items."
+}
