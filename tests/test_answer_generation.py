@@ -50,7 +50,7 @@ def test_request_gates_and_context_integrity(package, monkeypatch):
     )
     assert dry["status"] == "dry_run" and not dry["live_request_sent"]
     assert dry["request"]["model"] == MODEL
-    assert dry["request"]["provider"]["allow_fallbacks"] is False
+    assert "provider" not in dry["request"]
     for status in ("empty", "budget_blocked", "invalid_evidence"):
         bad = {**package, "status": status}
         assert generate_answer(bad, live=True)["status"] in {"insufficient_evidence", "invalid_context"}
@@ -79,6 +79,13 @@ def test_success_abstention_and_response_rejection(package):
     assert call({"error": {"message": "secret body"}})["status"] == "api_error"
     assert call({**response(), "model": "other"})["status"] == "invalid_response"
     assert call({"choices": []})["status"] == "invalid_response"
+    assert call({"choices": []})["error"]["status"] == "invalid_response"
+    assert call({"choices": []})["error"]["message"]
+    missing_reason = json.loads(response()["choices"][0]["message"]["content"])
+    del missing_reason["reason"]
+    filled = call({**response(), "choices": [{"finish_reason": "stop", "message": {"content": json.dumps(missing_reason)}}]})
+    assert filled["status"] == "answered"
+    assert filled["answer"]["reason"].startswith("Supported by")
 
 
 def test_http_failures_bounded_and_not_exposed(package, monkeypatch):
@@ -127,3 +134,52 @@ def test_configured_model_and_request_budget(package):
     tiny["budget"]["total_chars"] = 10
     result = generate_answer(tiny, live=True, api_key="fixture", transport=lambda *_: pytest.fail("Must not call"))
     assert result["status"] == "request_budget_exceeded" and not result["live_request_sent"]
+
+
+@pytest.mark.parametrize("first", [response(finish="length"), response(["S999"])])
+def test_completion_retry_feedback_and_recovery(package, monkeypatch, first):
+    monkeypatch.setattr("mobile_rag.answer_generation.time.sleep", lambda _: None)
+    requests = []
+
+    def recover(payload, *_):
+        requests.append(deepcopy(payload))
+        return first if len(requests) == 1 else response()
+
+    result = generate_answer(package, live=True, api_key="fixture", transport=recover)
+    assert result["status"] == "answered" and "error" not in result
+    assert len(requests) == 2
+    assert "Retry feedback" in requests[1]["messages"][0]["content"]
+    assert "Error:" in requests[1]["messages"][0]["content"]
+    assert requests[1]["messages"][0]["content"].startswith(requests[0]["messages"][0]["content"])
+    assert requests[1]["max_tokens"] == requests[0]["max_tokens"]
+    assert result["attempts"][0]["error"]
+    assert result["attempts"][0]["request_sha256"] != result["attempts"][1]["request_sha256"]
+
+
+def test_completion_retry_limits_and_terminal_finish(package, monkeypatch):
+    monkeypatch.setattr("mobile_rag.answer_generation.time.sleep", lambda _: None)
+    for retries, finish, expected in [(2, "length", 3), (0, "length", 1), (2, "content_filter", 1)]:
+        result = generate_answer(package, config=GenerationConfig(max_retries=retries),
+                                 live=True, api_key="fixture", transport=lambda *_, finish=finish: response(finish=finish))
+        assert result["status"] == "incomplete_response"
+        assert result["answer"] is None
+        assert len(result["attempts"]) == expected
+
+
+def test_retry_feedback_respects_request_budget(package, monkeypatch):
+    monkeypatch.setattr("mobile_rag.answer_generation.time.sleep", lambda _: None)
+    package = deepcopy(package)
+    config = GenerationConfig()
+    size = len(json.dumps(make_request(package, config), ensure_ascii=False))
+    package["budget"]["total_chars"] = size + package["budget"]["answer_reserve"]
+    calls = []
+
+    def truncated(*_):
+        calls.append(1)
+        return response(finish="length")
+
+    result = generate_answer(package, live=True, api_key="fixture", transport=truncated)
+    assert result["status"] == "request_budget_exceeded"
+    assert len(calls) == 1
+    assert result["attempts"][0]["finish_reason"] == "length"
+

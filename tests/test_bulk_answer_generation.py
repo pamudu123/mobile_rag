@@ -45,6 +45,7 @@ def test_benchmark_identity_and_dry_run_record(bundle, tmp_path):  # noqa: F811
     assert record["question_record"]["answer"] == "reference-only"
     assert "reference-only" not in record["generation"]["request"]["messages"][0]["content"]
     assert record["pipeline_status"] == "dry_run"
+    assert record["error"] is None
     assert record["retrieval"]["hits"] and record["context"]["status"] == "ready"
 
     contexts_by_key = {}
@@ -156,4 +157,26 @@ def test_contexts_and_results_saved_as_combined_json(tmp_path):
     assert row["generated_answer"] == "Identify emergency signs and treat immediately."
     assert row["context_id"] == "Q_S1:1"
     assert row["chunk_ids"] == ["chunk_a"]
+    assert row["error"] is None
     assert review_row(compact_second)["gt_answer"] == "Second GT."
+
+
+def test_pipeline_error_recorded_on_failed_generation():
+    from mobile_rag.bulk_answer_generation import pipeline_error, review_row
+
+    generation = {
+        "status": "invalid_response",
+        "reason": "Response schema or citation validation failed",
+        "error": {
+            "status": "invalid_response",
+            "reason": "Response schema or citation validation failed",
+            "type": "ValidationError",
+            "message": "citations: Unknown citation label",
+        },
+    }
+    error = pipeline_error(generation)
+    assert error["status"] == "invalid_response"
+    assert "Unknown citation label" in error["message"]
+    row = review_row({"record_key": "Q_S1:1", "pipeline_status": "invalid_response", "error": error})
+    assert row["error"]["type"] == "ValidationError"
+

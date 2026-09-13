@@ -13,6 +13,7 @@ from mobile_rag.retrieval_hybrid import HybridRetriever, RetrievalConfig
 
 CONTEXTS_FILENAME = "contexts.json"
 RESULTS_FILENAME = "results.json"
+_OK_STATUSES = {"answered", "insufficient_evidence", "dry_run"}
 RUNTIME_SHA256 = hashlib.sha256(b"".join(
     path.name.encode() + path.read_bytes() for path in sorted(Path(__file__).parent.glob("*.py"))
 )).hexdigest()
@@ -162,6 +163,24 @@ def load_record_context(
     return context if isinstance(context, dict) and "context_text" in context else None
 
 
+def pipeline_error(generation: dict[str, Any] | None, worker_error: dict[str, Any] | None = None) -> dict[str, Any] | None:
+    """Copy a compact error object for failed pipeline statuses."""
+    if worker_error:
+        return worker_error
+    if not isinstance(generation, dict):
+        return None
+    if isinstance(generation.get("error"), dict):
+        return generation["error"]
+    status = generation.get("status")
+    if status in _OK_STATUSES or not status:
+        return None
+    return {
+        key: generation[key]
+        for key in ("status", "reason", "http_status", "finish_reason", "returned_model", "failure_stage")
+        if generation.get(key) is not None
+    }
+
+
 def review_row(record: dict[str, Any]) -> dict[str, Any]:
     """Compact review fields: question, generated answer, ground-truth answer, and context IDs."""
     row = record.get("question_record") or {}
@@ -188,6 +207,7 @@ def review_row(record: dict[str, Any]) -> dict[str, Any]:
         "context_labels": labels,
         "chunk_ids": [group.get("chunk_id") for group in groups],
         "pipeline_status": record.get("pipeline_status"),
+        "error": record.get("error"),
     }
 
 
@@ -228,6 +248,7 @@ def process_question(
         "context": None,
         "generation": None,
         "pipeline_status": "running",
+        "error": None,
     }
     try:
         if query_source not in {"question", "topic"}:
@@ -240,7 +261,8 @@ def process_question(
             retrieval["retrieval_query"] = query
             retrieval["question"] = row["question"]
             expansion = retriever.expand(retrieval)
-            context = prepare_context(retriever, retrieval, expansion, context_budget)
+            context = prepare_context(retriever, retrieval, expansion, context_budget,
+                                      generation_config=generation_config)
         if retrieval["status"] in {"invalid_query", "error"}:
             generation = {"status": retrieval["status"], "answer": None, "live_request_sent": False,
                           "reason": retrieval.get("reason"), "failure_stage": "retrieval"}
@@ -252,13 +274,18 @@ def process_question(
             context=context,
             generation=generation,
             pipeline_status=generation["status"],
+            error=pipeline_error(generation),
             index_identity=retrieval.get("index_identity"),
             bundle_identity=retrieval.get("bundle_identity"),
         )
     except Exception as exc:  # noqa: BLE001 - retain a record for every unexpected worker failure.
         record.update(
             pipeline_status="worker_error",
-            error={"type": type(exc).__name__, "message": "Worker failed; exception details omitted"},
+            error=pipeline_error(None, {
+                "status": "worker_error",
+                "reason": "Worker failed; exception details omitted",
+                "type": type(exc).__name__,
+            }),
         )
     record["completed_at_utc"] = datetime.now(UTC).isoformat()
     record["pipeline_seconds"] = time.perf_counter() - start

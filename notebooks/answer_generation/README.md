@@ -13,7 +13,7 @@ uv run python notebooks/answer_generation/run_answer_generation.py --output-root
 uv run python notebooks/answer_generation/run_answer_generation.py --output-root artifacts/05_answer_generation --live
 ```
 
-Optional inputs: `--question` and `--index`. Outputs in a fresh run directory: `context.json`, `request_preview.json` when ready, and `result.json`. No automatic retries or model fallback. See [architecture](../../docs/architecture/06-answer-generation.md).
+Optional inputs: `--question` and `--index`. Outputs in a fresh run directory: `context.json`, `request_preview.json` when ready, and `result.json`. Retries share the configured `max_retries` limit (default 2): HTTP 429/5xx, truncated completions, and invalid answer JSON/schema/citations. Completion retries include corrective feedback. Other finish reasons and network errors remain terminal. No model fallback. See [architecture](../../docs/architecture/06-answer-generation.md).
 
 ## Bulk generation
 
@@ -25,4 +25,6 @@ Use [05_2_bulk_answer_generation.ipynb](05_2_bulk_answer_generation.ipynb) to pr
 - `LIVE`: `False` saves dry-run records; `True` makes OpenRouter requests.
 - `OUTPUT_ROOT` and `RESUME_RUN_DIR`: new-run and explicit-resume locations.
 
-The notebook saves a run manifest, compact checkpointed JSONL records, one combined `contexts.json`, a `results.json` review file, a compact CSV, and a summary. Checkpoints keep the benchmark row, retrieval, context indexes, citation map, generation response, usage, timings, and a pointer into `contexts.json`. `results.json` stores the question, generated answer, ground-truth answer, context ID, and citations. Reference answers are saved for later evaluation but are excluded from retrieval and model prompts. No automatic API retry is performed.
+The notebook saves a run manifest, compact checkpointed JSONL records, one combined `contexts.json`, a `results.json` review file, a compact CSV, and a summary. Checkpoints keep the benchmark row, retrieval, context indexes, citation map, generation response, usage, timings, and a pointer into `contexts.json`. `results.json` stores the question, generated answer, ground-truth answer, context ID, and citations. Reference answers are saved for later evaluation but are excluded from retrieval and model prompts. Retries use the same bounded policy as single-answer generation; each attempt records its error, request hash, and returned usage.
+
+The default context budget is 40,000 characters, including a 4,000-character answer reserve. Packing checks the serialized prompt, evidence, response schema, and request envelope before including each whole evidence group. This is character accounting, not a provider token limit. After prompt or budget changes, restart the notebook kernel and start a fresh run (`RESUME_RUN_DIR = None`).

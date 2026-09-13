@@ -60,3 +60,24 @@ def test_packing_contract(bundle):  # noqa: F811
             assert not rejected["context_text"]
         with pytest.raises(ValueError):
             prepare_context(retriever, result, budget=ContextBudget(-1))
+
+
+def test_full_request_budget_accounts_for_prompt_growth(bundle, monkeypatch):  # noqa: F811
+    import json
+
+    from mobile_rag import answer_generation as generation
+
+    root, folder = bundle
+    config = generation.GenerationConfig(model="test/" + "x" * 100)
+    with Retriever(build_index(folder, root / "indexes")) as retriever:
+        result = retriever.search("uniquealpha")
+        packed = prepare_context(retriever, result, generation_config=config)
+        assert generation.generate_answer(packed, config=config)["status"] == "dry_run"
+        exact = len(json.dumps(generation.make_request(packed, config), ensure_ascii=False))
+        budget = ContextBudget(exact + 4000, 1, 4000)
+        fitted = prepare_context(retriever, result, budget=budget, generation_config=config)
+        assert generation.generate_answer(fitted, config=config)["status"] == "dry_run"
+        monkeypatch.setattr(generation, "INSTRUCTIONS", generation.INSTRUCTIONS + "x" * budget.total_chars)
+        blocked = prepare_context(retriever, result, budget=budget, generation_config=config)
+        assert blocked["status"] == "budget_blocked"
+        assert not blocked["evidence_groups"]

@@ -42,3 +42,5 @@ def test_schema_and_roundtrip():
         {"status": "answered", "answer": "Answer", "citations": ["S1"], "reason": "Source supports this answer"},
     ]:
         assert validate_answer(json.dumps(answer), {"S1": {}}) == answer
+    missing = {"status": "answered", "answer": "Answer", "citations": ["S1"]}
+    assert validate_answer(json.dumps(missing), {"S1": {}})["reason"] == "Supported by S1."

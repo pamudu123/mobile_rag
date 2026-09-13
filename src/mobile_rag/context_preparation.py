@@ -8,7 +8,7 @@ from mobile_rag.retrieval import Retriever
 
 @dataclass(frozen=True)
 class ContextBudget:
-    total_chars: int = 20000
+    total_chars: int = 40000
     instruction_reserve: int = 7000
     answer_reserve: int = 4000
 
@@ -18,7 +18,7 @@ class ContextBudget:
         return max(0, self.total_chars - self.instruction_reserve - self.answer_reserve - len(question))
 
 
-def prepare_context(retriever: Retriever, result, expansion=None, budget=None):
+def prepare_context(retriever: Retriever, result, expansion=None, budget=None, *, generation_config=None):
     """Validate against the open index before packing whole parent-chunk groups.
 
     Shared passages are rendered once and referenced by label thereafter. JSON
@@ -123,7 +123,18 @@ def prepare_context(retriever: Retriever, result, expansion=None, budget=None):
         }
         block = json.dumps(group, ensure_ascii=False, sort_keys=True)
         proposed = "\n".join([*rendered, block])
-        if len(proposed) > allowance:
+        request_exceeds_budget = False
+        if budget.instruction_reserve:
+            # Include escaped prompt/evidence, schema, and envelope before accepting
+            # a whole group. Zero reserve retains evidence-only packing semantics.
+            from mobile_rag.answer_generation import GenerationConfig, render_request
+
+            request = render_request(question, [json.loads(item) for item in [*rendered, block]],
+                                     generation_config or GenerationConfig())
+            request_exceeds_budget = (
+                len(json.dumps(request, ensure_ascii=False)) + budget.answer_reserve > budget.total_chars
+            )
+        if len(proposed) > allowance or request_exceeds_budget:
             package["excluded_evidence"].append({"chunk_id": cid, "reason": "whole_group_exceeds_remaining_budget"})
             continue
         rendered.append(block)

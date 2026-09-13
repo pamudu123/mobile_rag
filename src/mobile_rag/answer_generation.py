@@ -13,20 +13,17 @@ from mobile_rag.answer_schema import GroundedAnswer, answer_json_schema
 from mobile_rag.environment import openrouter_api_key
 
 # MODEL = "google/gemma-3-4b-it"
-MODEL = "openai/gpt-5.6-luna"
-PROMPT_VERSION = "evidence-answer/v3"
-PROMPT_PATH = Path(__file__).resolve().parents[2] / "prompts" / "answer_generation.md"
-if not (PROMPT_PATH.parent.parent / "pyproject.toml").is_file():
-    PROMPT_PATH = Path(__file__).resolve().parent / "prompts" / "answer_generation.md"
+MODEL = "qwen/qwen3.5-9b"
+PROMPT_VERSION = "evidence-answer/v6"
+PROMPT_PATH = Path(__file__).resolve().parent / "prompts" / "answer_generation.md"
 INSTRUCTIONS = PROMPT_PATH.read_text(encoding="utf-8").rstrip()
 PROMPT_SHA256 = hashlib.sha256(INSTRUCTIONS.encode("utf-8")).hexdigest()
 
 
 @dataclass(frozen=True)
 class GenerationConfig:
-    max_output_tokens: int = 1024 * 2
-    timeout_seconds: int = 60
-    provider: str = "DeepInfra"
+    max_output_tokens: int = 1024 * 2 * 2 * 2
+    timeout_seconds: int = 120
     model: str = MODEL
     temperature: float = 0.0
     max_retries: int = 2
@@ -36,8 +33,6 @@ class GenerationConfig:
         for value in (self.max_output_tokens, self.timeout_seconds):
             if type(value) is not int or value <= 0:
                 raise ValueError("Generation limits must be positive integers")
-        if self.provider != "DeepInfra":
-            raise ValueError("This adapter currently pins DeepInfra")
         if not isinstance(self.model, str) or not self.model.strip():
             raise ValueError("Model must be a nonblank identifier")
         if (type(self.temperature) not in (int, float) or not math.isfinite(self.temperature)
@@ -58,7 +53,7 @@ def generation_identity(config):
         "prompt_version": PROMPT_VERSION,
         "prompt_sha256": PROMPT_SHA256,
         "schema_sha256": hashlib.sha256(json.dumps(answer_json_schema(["S1"]), sort_keys=True).encode()).hexdigest(),
-        "adapter_version": "openrouter-grounded/v2",
+        "adapter_version": "openrouter-grounded/v3",
     }
 
 
@@ -97,14 +92,19 @@ def validate_package(package):
 def make_request(package, config):
     config.validate()
     validate_package(package)
-    schema = answer_json_schema(list(package["citation_map"]))
+    return render_request(package["question"], [json.loads(line) for line in package["context_text"].split("\n")], config)
+
+
+def render_request(question, evidence, config):
+    """Render the full wire payload for generation and context budget accounting."""
+    schema = answer_json_schema([group["label"] for group in evidence])
     content = (
         INSTRUCTIONS
         + "\n\nINPUT DATA:\n"
         + json.dumps(
             {
-                "question": package["question"],
-                "evidence": [json.loads(line) for line in package["context_text"].split("\n")],
+                "question": question,
+                "evidence": evidence,
             },
             ensure_ascii=False,
         )
@@ -116,7 +116,6 @@ def make_request(package, config):
         "temperature": config.temperature,
         "max_tokens": config.max_output_tokens,
         "stream": False,
-        "provider": {"only": [config.provider], "allow_fallbacks": False, "require_parameters": True},
         "response_format": {
             "type": "json_schema",
             "json_schema": {"name": "grounded_answer", "strict": True, "schema": schema},
@@ -125,6 +124,14 @@ def make_request(package, config):
 
 
 def validate_answer(content, citation_map):
+    payload = json.loads(content)
+    if isinstance(payload, dict) and "reason" not in payload:
+        citations = [label for label in payload.get("citations") or [] if isinstance(label, str) and label.strip()]
+        if payload.get("status") == "answered":
+            payload["reason"] = "Supported by " + (", ".join(citations) if citations else "the cited evidence") + "."
+        elif payload.get("status") == "insufficient_evidence":
+            payload["reason"] = "The supplied evidence does not fully support the requested fact."
+        content = json.dumps(payload, ensure_ascii=False)
     return GroundedAnswer.model_validate_json(content, context={"citation_map": citation_map}).model_dump()
 
 
@@ -140,6 +147,15 @@ def post_openrouter(payload, api_key, timeout):
         if len(raw) > 2_000_000:
             raise ValueError("Response too large")
         return json.loads(raw)
+
+
+def _failure(status, reason, **extra):
+    error = {"status": status, "reason": reason}
+    error.update({key: value for key, value in extra.items() if value is not None})
+    payload = {"status": status, "reason": reason, "error": error}
+    if "http_status" in extra:
+        payload["http_status"] = extra["http_status"]
+    return payload
 
 
 def generate_answer(package, *, config=None, api_key=None, live=False, transport=None):
@@ -166,7 +182,7 @@ def generate_answer(package, *, config=None, api_key=None, live=False, transport
     try:
         payload = make_request(package, config)
     except (KeyError, TypeError, ValueError) as exc:
-        return {**output, "reason": str(exc)}
+        return {**output, **_failure("invalid_context", str(exc), type=type(exc).__name__)}
     output["request_sha256"] = hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
     output["citation_map"] = package["citation_map"]
     output["bundle_identity"] = package["bundle_identity"]
@@ -174,57 +190,127 @@ def generate_answer(package, *, config=None, api_key=None, live=False, transport
     request_chars = len(json.dumps(payload, ensure_ascii=False))
     output["request_budget"] = {"serialized_request_chars": request_chars, "counting_method": "characters_not_tokens"}
     if request_chars + budget.get("answer_reserve", 0) > budget.get("total_chars", 20000):
-        return {**output, "status": "request_budget_exceeded", "reason": "Rendered request exceeds character budget"}
+        return {**output, **_failure("request_budget_exceeded", "Rendered request exceeds character budget")}
     if not live:
         return {**output, "status": "dry_run", "request": payload}
     api_key = api_key or openrouter_api_key()
     if not api_key:
-        return {**output, "status": "credentials_required"}
+        return {**output, **_failure("credentials_required", "OPENROUTER_API_KEY is missing")}
     start = time.perf_counter()
     output["live_request_sent"] = transport is None
     output["transport"] = "openrouter" if transport is None else "injected_test_transport"
+    base_content = payload["messages"][0]["content"]
+    retry_feedback = None
     try:
         for attempt in range(config.max_retries + 1):
+            if retry_feedback:
+                payload = {**payload, "messages": [{
+                    "role": "user", "content": base_content + "\n\n## Retry feedback\n" + retry_feedback,
+                }]}
+            request_chars = len(json.dumps(payload, ensure_ascii=False))
+            if request_chars + budget.get("answer_reserve", 0) > budget.get("total_chars", 20000):
+                output.update(_failure("request_budget_exceeded", "Retry request exceeds character budget"))
+                return output
+            record = {
+                "attempt": attempt + 1,
+                "request_sha256": hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest(),
+                "serialized_request_chars": request_chars,
+            }
+            if retry_feedback:
+                record["retry_feedback"] = retry_feedback
+            output["attempts"].append(record)
             try:
                 response = (transport or post_openrouter)(payload, api_key, config.timeout_seconds)
-                output["attempts"].append({"attempt": attempt + 1, "status": "response_received"})
-                break
+                record["status"] = "response_received"
             except urllib.error.HTTPError as exc:
                 retryable = exc.code == 429 or 500 <= exc.code <= 599
-                output["attempts"].append({"attempt": attempt + 1, "status": "http_error", "http_status": exc.code})
+                record.update(status="http_error", http_status=exc.code)
                 exc.close()
                 if not retryable or attempt == config.max_retries:
                     raise
                 time.sleep(config.retry_delay_seconds * (2 ** attempt))
-        if not isinstance(response, dict):
-            raise TypeError("Response must be an object")
-        if "error" in response:
-            output.update(status="api_error", reason="Provider returned an error payload")
+                continue
+            if not isinstance(response, dict):
+                raise TypeError("Response must be an object")
+            if "error" in response:
+                output.update(_failure("api_error", "Provider returned an error payload", type="ProviderError"))
+                return output
+            choice = response["choices"][0]
+            record.update(usage=response.get("usage"), finish_reason=choice.get("finish_reason"))
+            output.update(
+                usage=response.get("usage"),
+                provider=response.get("provider"),
+                response_id=response.get("id"),
+                finish_reason=choice.get("finish_reason"),
+                returned_model=response.get("model"),
+            )
+            if response.get("model") != config.model:
+                output.update(_failure(
+                    "invalid_response", "Unexpected model", type="UnexpectedModel",
+                    expected_model=config.model, returned_model=response.get("model"),
+                ))
+                return output
+            failure = None
+            if choice.get("finish_reason") != "stop":
+                failure = _failure(
+                    "incomplete_response", "Completion did not finish normally",
+                    type="IncompleteCompletion", finish_reason=choice.get("finish_reason"),
+                )
+                # Other finish reasons can represent filtering/refusal and are terminal.
+                retryable = choice.get("finish_reason") == "length"
+                retry_feedback = (
+                    'Error: incomplete_response / IncompleteCompletion: Completion did not finish normally '
+                    '(finish_reason="length"). Retry from the beginning with a concise, complete JSON object. '
+                    'Return status, answer, reason, and citations only. Avoid lengthy explanations; '
+                    'preserve necessary clinical qualifiers and cite only supplied evidence. '
+                    'Do not continue the truncated response or output reasoning traces.'
+                )
+            else:
+                try:
+                    answer = validate_answer(choice["message"]["content"], package["citation_map"])
+                except (KeyError, TypeError, ValueError):
+                    failure = _failure(
+                        "invalid_response", "Response schema or citation validation failed", type="InvalidAnswer",
+                    )
+                    retryable = True
+                    retry_feedback = (
+                        'Error: invalid_response: Response schema or citation validation failed. '
+                        'Retry with one complete JSON object containing exactly status, answer, reason, and citations. '
+                        'Use the required types, a nonblank reason, and only unique supplied citation labels. '
+                        'For insufficient_evidence use an empty answer and empty citations. '
+                        'Return no Markdown or extra text; ground every clinical claim in the supplied evidence.'
+                    )
+            if failure:
+                record.update(status=failure["status"], error=failure["error"])
+                if not retryable or attempt == config.max_retries:
+                    output.update(failure)
+                    return output
+                time.sleep(config.retry_delay_seconds * (2 ** attempt))
+                continue
+            output.update(status=answer["status"], answer=answer, citation_validation="passed")
+            if answer["status"] == "insufficient_evidence":
+                output["abstention_origin"] = "model"
             return output
-        choice = response["choices"][0]
-        output.update(
-            usage=response.get("usage"),
-            provider=response.get("provider"),
-            response_id=response.get("id"),
-            finish_reason=choice.get("finish_reason"),
-            returned_model=response.get("model"),
-        )
-        if response.get("model") != config.model:
-            output.update(status="invalid_response", reason="Unexpected model")
-            return output
-        if choice.get("finish_reason") != "stop":
-            output.update(status="incomplete_response", reason="Completion did not finish normally")
-            return output
-        answer = validate_answer(choice["message"]["content"], package["citation_map"])
-        output.update(status=answer["status"], answer=answer, citation_validation="passed")
-        if answer["status"] == "insufficient_evidence":
-            output["abstention_origin"] = "model"
     except urllib.error.HTTPError as exc:
-        output.update(status="api_error", http_status=exc.code, reason="HTTP request failed; response body omitted")
-    except (urllib.error.URLError, TimeoutError, OSError):
-        output.update(status="api_error", reason="Network failure or timeout; not automatically retried")
-    except (AttributeError, KeyError, IndexError, TypeError, ValueError):
-        output.update(status="invalid_response", answer=None, reason="Response schema or citation validation failed")
+        output.update(_failure(
+            "api_error",
+            "HTTP request failed; response body omitted",
+            type="HTTPError",
+            http_status=exc.code,
+        ))
+    except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        output.update(_failure(
+            "api_error",
+            "Network failure or timeout; not automatically retried",
+            type=type(exc).__name__,
+        ))
+    except (AttributeError, KeyError, IndexError, TypeError, ValueError) as exc:
+        output.update(answer=None, **_failure(
+            "invalid_response",
+            "Response schema or citation validation failed",
+            type=type(exc).__name__,
+            message=str(exc),
+        ))
     finally:
         output["latency_ms"] = (time.perf_counter() - start) * 1000
     return output

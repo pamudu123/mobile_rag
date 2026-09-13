@@ -49,13 +49,14 @@ def answer_json_schema(labels: list[str]) -> dict:
     schema["properties"]["citations"]["items"]["enum"] = list(dict.fromkeys(labels))
     schema["properties"]["citations"]["uniqueItems"] = True
     schema["properties"]["reason"]["pattern"] = r"\S"
+    schema["required"] = ["status", "answer", "reason", "citations"]
     schema["anyOf"] = [
-        {"properties": {
+        {"required": ["status", "answer", "reason", "citations"], "properties": {
             "status": {"const": "answered"},
             "answer": {"pattern": r"\S"},
             "citations": {"minItems": 1},
         }},
-        {"properties": {
+        {"required": ["status", "answer", "reason", "citations"], "properties": {
             "status": {"const": "insufficient_evidence"},
             "answer": {"const": ""},
             "citations": {"maxItems": 0},
