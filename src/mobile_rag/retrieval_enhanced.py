@@ -4,10 +4,9 @@ import json
 import shutil
 import sqlite3
 import time
-from datetime import UTC, datetime
 from pathlib import Path
 
-from mobile_rag.retrieval import Retriever, digest, write_json
+from mobile_rag.retrieval import Retriever, digest, new_run_dir, write_json
 
 FILLER = frozenset(
     [
@@ -30,11 +29,49 @@ FILLER = frozenset(
         "to",
         "in",
         "how",
+        "during",
+        "busy",
+        "frontline",
+        "asks",
+        "ask",
+        "face",
+        "facing",
+        "this",
+        "that",
+        "these",
+        "those",
+        "situation",
+        "correct",
+        "answer",
+        "from",
+        "can",
+        "could",
+        "would",
+        "you",
+        "we",
+        "my",
+        "our",
+        "your",
+        "need",
+        "know",
+        "help",
+        "understand",
+        "give",
+        "provide",
     ]
 )
 SETTINGS = {"version": 1, "heading_weight": 3.0, "candidate_limit": 40, "rrf_k": 60, "near_distance": 8}
 # Corpus-attested expansion, not a generated medical synonym dictionary.
 ALIASES = {"cpap": "continuous positive airway pressure"}
+
+
+def clean_question(terms):
+    """Filter conversational tokens independent of wording or sentence order.
+
+    Input uses the index tokenizer. Preserve clinical setting/role terms such
+    as clinic and health worker, as well as negations and numeric qualifiers.
+    """
+    return [term for term in terms if term not in FILLER]
 
 
 def quoted(text):
@@ -52,8 +89,7 @@ def fuse(branches, k=60):
 
 def build_enhanced(index_dir: Path, output_root: Path) -> Path:
     with Retriever(index_dir) as base:
-        out = output_root / datetime.now(UTC).strftime("%Y%m%dT%H%M%S%fZ")
-        out.mkdir(parents=True)
+        out = new_run_dir(output_root)
         for name in ("retrieval.sqlite", "index_manifest.json"):
             shutil.copyfile(index_dir / name, out / name)
         path = out / "passage.sqlite"
@@ -113,14 +149,27 @@ class EnhancedRetriever(Retriever):
             return result
         if mode != "OR":
             return result  # Explicit AND retains the baseline contract.
-        terms = result["terms"]
-        focused = [t for t in terms if t not in FILLER] or terms
-        original = result["compiled_query"]
+        focused = clean_question(result["terms"])
+        result.update(
+            cleaned_question=" ".join(focused),
+            focused_terms=focused,
+            query_cleanup_version="conversational-stopwords/v1",
+            retrieval_variant="enhanced_v2_query_cleanup",
+        )
+        if not focused:
+            return {
+                **result, "status": "invalid_query", "reason": "no_clinical_terms",
+                "hits": [], "compiled_query": None, "branches": {}, "branch_queries": {},
+                "search_seconds": time.perf_counter() - start,
+            }
         focused_query = " OR ".join(map(quoted, focused))
-        specs = [("baseline", original, 1.0)]
+        result["compiled_query"] = focused_query
+        # Every fused branch uses the cleaned terms; otherwise baseline/heading
+        # votes can reintroduce the same conversational distractors.
+        specs = [("baseline", focused_query, 1.0)]
         if "heading" not in disabled:
-            specs.append(("heading", original, SETTINGS["heading_weight"]))
-        if "focused" not in disabled and focused != terms:
+            specs.append(("heading", focused_query, SETTINGS["heading_weight"]))
+        if "focused" not in disabled:
             specs.append(("focused", focused_query, 3.0))
         if 2 <= len(focused) <= 8:
             if "phrase" not in disabled:
@@ -174,7 +223,7 @@ class EnhancedRetriever(Retriever):
             branch_queries=queries,
             focused_terms=focused,
             status="ok" if ids else "no_matches",
-            retrieval_variant="enhanced_v1",
+            retrieval_variant="enhanced_v2_query_cleanup",
         )
         result["search_seconds"] = time.perf_counter() - start
         return result

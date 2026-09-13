@@ -5,6 +5,7 @@ from mobile_rag.bulk_answer_generation import benchmark_identity, process_questi
 from mobile_rag.context_preparation import ContextBudget
 from mobile_rag.retrieval import build_index
 from mobile_rag.retrieval_enhanced import build_enhanced
+from mobile_rag.retrieval_hybrid import RetrievalConfig
 
 
 def test_benchmark_identity_and_dry_run_record(bundle, tmp_path):  # noqa: F811
@@ -25,6 +26,7 @@ def test_benchmark_identity_and_dry_run_record(bundle, tmp_path):  # noqa: F811
         live=False,
         generation_config=GenerationConfig(),
         context_budget=ContextBudget(),
+        retrieval_config=RetrievalConfig(enable_embeddings=False),
     )
     assert record["record_key"] == "Q_TEST:1"
     assert record["question_record"]["answer"] == "reference-only"

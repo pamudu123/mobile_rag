@@ -9,7 +9,7 @@ from typing import Any
 
 from mobile_rag.answer_generation import GenerationConfig, generate_answer
 from mobile_rag.context_preparation import ContextBudget, prepare_context
-from mobile_rag.retrieval_enhanced import EnhancedRetriever
+from mobile_rag.retrieval_hybrid import HybridRetriever, RetrievalConfig
 
 
 def benchmark_identity(path: Path) -> dict[str, Any]:
@@ -52,6 +52,7 @@ def process_question(
     live: bool,
     generation_config: GenerationConfig,
     context_budget: ContextBudget,
+    retrieval_config: RetrievalConfig | None = None,
 ) -> dict[str, Any]:
     """Run one isolated retrieval-to-generation pipeline without writing files."""
     started = datetime.now(UTC).isoformat()
@@ -71,7 +72,7 @@ def process_question(
         "pipeline_status": "running",
     }
     try:
-        with EnhancedRetriever(index_dir) as retriever:
+        with HybridRetriever(index_dir, retrieval_config) as retriever:
             retrieval = retriever.search(row["question"])
             expansion = retriever.expand(retrieval)
             context = prepare_context(retriever, retrieval, expansion, context_budget)

@@ -1,9 +1,10 @@
 import json
+import re
 
 import pytest
 
 from mobile_rag.corpus import build_chunks, build_inventory, export_chunks, export_inventory
-from mobile_rag.retrieval import Retriever, build_index, digest, load_bundle
+from mobile_rag.retrieval import Retriever, build_index, digest, load_bundle, new_run_dir
 
 
 @pytest.fixture
@@ -56,6 +57,13 @@ def test_search_readonly_provenance_and_query_safety(bundle):
         (isolated / name).write_bytes((out / name).read_bytes())
     with Retriever(isolated) as retriever:
         assert retriever.search("uniquealpha")["hits"][0]["passages"]
+
+
+def test_new_run_dir_uses_compact_timestamp(tmp_path):
+    first, second = new_run_dir(tmp_path), new_run_dir(tmp_path)
+    assert re.fullmatch(r"\d{8}_\d{6}", first.name)
+    assert re.fullmatch(r"\d{8}_\d{6}(?:_\d+)?", second.name)
+    assert first != second
 
 
 def test_rebuild_deterministic_and_tampering_rejected(bundle):

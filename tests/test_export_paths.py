@@ -1,3 +1,5 @@
+import re
+
 from mobile_rag.corpus import build_chunks, build_inventory, export_chunks, export_inventory
 
 
@@ -13,3 +15,5 @@ def test_exports_outside_project_can_feed_chunking(tmp_path):
     assert chunks.parent == tmp_path / "external_chunks"
     assert (chunks / "chunks.jsonl").is_file()
     assert not (project / "artifacts").exists()
+    assert re.fullmatch(r"\d{8}_\d{6}", inventory.name)
+    assert re.fullmatch(r"\d{8}_\d{6}", chunks.name)

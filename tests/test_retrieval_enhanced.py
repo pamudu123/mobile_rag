@@ -2,7 +2,7 @@ import pytest
 from test_retrieval import bundle  # noqa: F401
 
 from mobile_rag.retrieval import build_index, digest
-from mobile_rag.retrieval_enhanced import EnhancedRetriever, build_enhanced, fuse
+from mobile_rag.retrieval_enhanced import EnhancedRetriever, build_enhanced, clean_question, fuse
 
 
 def test_rrf_deduplicates_and_breaks_ties():
@@ -10,6 +10,39 @@ def test_rrf_deduplicates_and_breaks_ties():
     assert ids == ["x", "y"]
     assert scores["x"] == pytest.approx(1 / 61 + 1 / 62)
     assert evidence["y"] == {"a": 2, "b": 1}
+
+
+@pytest.mark.parametrize("topic", [
+    "cpap contraindication", "no single antibiotic dose", "5 kg f75",
+    "2019 first line 30 kg", "not under 5 years without oxygen",
+    "health worker exposure tb clinic",
+])
+def test_cleanup_preserves_clinical_details(topic):
+    terms = topic.split()
+    assert clean_question(["please", "help", *terms, "what", "should", "i", "remember"]) == terms
+    assert clean_question(terms) == terms
+
+
+def test_generic_filler_does_not_reach_any_branch(bundle):  # noqa: F811
+    root, folder = bundle
+    out = build_enhanced(build_index(folder, root / "base"), root / "enhanced")
+    with EnhancedRetriever(out) as retriever:
+        bare = retriever.search("uniquealpha apple")
+        for question in (
+            "Could you please explain uniquealpha apple to me?",
+            "I need to know about uniquealpha. Help me understand apple.",
+            "uniquealpha: what should we remember about apple?",
+        ):
+            result = retriever.search(question)
+            assert result["question"] == question
+            assert result["focused_terms"] == ["uniquealpha", "apple"]
+            assert result["branch_queries"] == bare["branch_queries"]
+            assert result["hits"] == bare["hits"]
+        empty = retriever.search(
+            "Could you please help me understand this situation?"
+        )
+        assert empty["status"] == "invalid_query"
+        assert empty["hits"] == []
 
 
 def test_enhancements_preserve_evidence_and_inputs(bundle):  # noqa: F811

@@ -34,6 +34,19 @@ def write_json(path: Path, value: Any) -> None:
     path.write_text(encode(value) + "\n", encoding="utf-8")
 
 
+def new_run_dir(output_root: Path, when: datetime | None = None) -> Path:
+    """Create `output_root/yyyymmdd_hhmmss`, adding `_2`, `_3`, ... if that second is taken."""
+    stamp = (when or datetime.now(UTC)).strftime("%Y%m%d_%H%M%S")
+    path, n = Path(output_root) / stamp, 2
+    while True:
+        try:
+            path.mkdir(parents=True, exist_ok=False)
+            return path
+        except FileExistsError:
+            path = Path(output_root) / f"{stamp}_{n}"
+            n += 1
+
+
 def load_bundle(folder: Path) -> dict[str, Any]:
     """Validate the files loaded, including source-segment and citation relationships."""
     manifest = json.loads((folder / "run_manifest.json").read_text(encoding="utf-8"))
@@ -143,9 +156,7 @@ def build_index(bundle_dir: Path, output_root: Path) -> Path:
             {"input_hashes": data["manifest"]["output_sha256"], "config": CONFIG, "sqlite": sqlite3.sqlite_version}
         ).encode()
     ).hexdigest()
-    run_id = datetime.now(UTC).strftime("%Y%m%dT%H%M%S%fZ") + "_" + identity[:10]
-    out = output_root / run_id
-    out.mkdir(parents=True, exist_ok=False)
+    out = new_run_dir(output_root)
     temp = out / "building.sqlite"
     counts = {name: len(data[name]) for name in INPUTS}
     metadata = {

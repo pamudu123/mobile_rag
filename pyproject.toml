@@ -4,6 +4,10 @@ version = "0.1.0"
 description = "On-device retrieval-augmented generation for mobile."
 requires-python = ">=3.11"
 dependencies = [
+    "huggingface-hub>=0.30,<2",
+    "tokenizers>=0.21,<1",
+    "numpy>=1.26,<3",
+    "onnxruntime>=1.17,<2",
     "pillow>=12.3.0",
     "pydantic>=2.10,<3",
     "pymupdf>=1.28.2",

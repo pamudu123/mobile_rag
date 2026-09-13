@@ -40,6 +40,18 @@ def utc_now() -> str:
     return datetime.now(UTC).replace(microsecond=0).isoformat()
 
 
+def _new_run_dir(output_root: Path, created_at_utc: str) -> Path:
+    stamp = datetime.fromisoformat(created_at_utc).strftime("%Y%m%d_%H%M%S")
+    output, n = Path(output_root) / stamp, 2
+    while True:
+        try:
+            output.mkdir(parents=True, exist_ok=False)
+            return output
+        except FileExistsError:
+            output = Path(output_root) / f"{stamp}_{n}"
+            n += 1
+
+
 def sha256_file(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
@@ -325,13 +337,7 @@ def _write_csv(path: Path, values: list[dict[str, Any]]) -> None:
 
 
 def export_inventory(inventory: dict[str, Any], project_root: Path, *, output_root: Path) -> Path:
-    run_id = (
-        inventory["run"]["created_at_utc"].replace(":", "-").replace("+00:00", "Z")
-        + "_"
-        + inventory["run"]["input_fingerprint"][:10]
-    )
-    output = Path(output_root) / run_id
-    output.mkdir(parents=True, exist_ok=False)
+    output = _new_run_dir(output_root, inventory["run"]["created_at_utc"])
     _write_json(output / "corpus_manifest.json", inventory)
     _write_csv(output / "file_inventory.csv", inventory["files"])
     _write_csv(output / "issues.csv", inventory["issues"])
@@ -758,13 +764,7 @@ def validate_chunks(bundle: dict[str, Any], project_root: Path) -> dict[str, Any
 
 
 def export_chunks(bundle: dict[str, Any], project_root: Path, *, output_root: Path) -> Path:
-    run_id = (
-        bundle["run"]["created_at_utc"].replace(":", "-").replace("+00:00", "Z")
-        + "_"
-        + bundle["run"]["bundle_fingerprint"][:10]
-    )
-    output = Path(output_root) / run_id
-    output.mkdir(parents=True, exist_ok=False)
+    output = _new_run_dir(output_root, bundle["run"]["created_at_utc"])
     _write_jsonl(output / "documents.jsonl", bundle["documents"])
     _write_jsonl(output / "passages.jsonl", bundle["passages"])
     _write_jsonl(output / "chunks.jsonl", bundle["chunks"])

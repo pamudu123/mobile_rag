@@ -11,8 +11,9 @@ from pathlib import Path
 from mobile_rag.answer_schema import GroundedAnswer, answer_json_schema
 from mobile_rag.environment import openrouter_api_key
 
-MODEL = "google/gemma-3-4b-it"
-PROMPT_VERSION = "evidence-answer/v2"
+# MODEL = "google/gemma-3-4b-it"
+MODEL = "qwen/qwen3-14b"
+PROMPT_VERSION = "evidence-answer/v3"
 PROMPT_PATH = Path(__file__).resolve().parents[2] / "prompts" / "answer_generation.md"
 INSTRUCTIONS = PROMPT_PATH.read_text(encoding="utf-8").rstrip()
 

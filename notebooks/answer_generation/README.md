@@ -1,6 +1,6 @@
 # Answer generation
 
-Uses OpenRouter `google/gemma-3-4b-it`. No local tokenizer or model files are required.
+Uses OpenRouter `google/gemma-3-4b-it` for generation and local BM25 + BGE hybrid retrieval by default. Build a dense bundle first using the [hybrid guide](../retrieval/HYBRID.md). Set `ENABLE_BM25` and `ENABLE_EMBEDDINGS` in the single/bulk notebooks, or use the single-answer CLI's `--no-bm25` / `--no-embeddings`. Both-off is rejected. Lexical-only mode does not require BGE assets.
 
 - Set `OUTPUT_ROOT` in the notebook to choose where artifacts are saved.
 - `LIVE=False`: retrieve evidence, prepare context, validate the package and save a request preview; no API call or generated answer.
