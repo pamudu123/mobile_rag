@@ -17,7 +17,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "src"))
 
-from mobile_rag.answer_generation import GenerationConfig, PROMPT_SHA256, PROMPT_VERSION, generation_identity
+from mobile_rag.answer_generation import PROMPT_SHA256, PROMPT_VERSION, generation_identity, load_generation_config
 from mobile_rag.bulk_answer_generation import (
     RUNTIME_SHA256,
     benchmark_identity,
@@ -46,8 +46,7 @@ MAX_WORKERS = 4
 ENABLE_BM25 = True
 ENABLE_EMBEDDINGS = True
 QUERY_SOURCE = "question"
-MAX_OUTPUT_TOKENS = 4096 * 2
-TIMEOUT_SECONDS = 120
+THINKING = True
 TOTAL_CHARS = 40000
 INSTRUCTION_RESERVE = 7000
 ANSWER_RESERVE = 4000
@@ -67,7 +66,7 @@ def main() -> dict:
 
     retrieval_config = RetrievalConfig(ENABLE_BM25, ENABLE_EMBEDDINGS)
     retrieval_config.validate()
-    generation_config = GenerationConfig(max_output_tokens=MAX_OUTPUT_TOKENS, timeout_seconds=TIMEOUT_SECONDS)
+    generation_config = load_generation_config(THINKING)
     context_budget = ContextBudget(
         total_chars=TOTAL_CHARS,
         instruction_reserve=INSTRUCTION_RESERVE,
@@ -83,6 +82,8 @@ def main() -> dict:
         "number_of_questions": NUMBER_OF_QUESTIONS,
         "live": LIVE,
         "workers": MAX_WORKERS,
+        "thinking": THINKING,
+        "generation_config": asdict(generation_config),
         "api_key_available": bool(openrouter_api_key()),
     })
 

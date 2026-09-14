@@ -5,7 +5,7 @@ from copy import deepcopy
 import pytest
 from test_retrieval import bundle  # noqa: F401
 
-from mobile_rag.answer_generation import MODEL, GenerationConfig, generate_answer, make_request
+from mobile_rag.answer_generation import MODEL, GenerationConfig, generate_answer, load_generation_config, make_request
 from mobile_rag.context_preparation import prepare_context
 from mobile_rag.retrieval import Retriever, build_index
 
@@ -123,10 +123,28 @@ def test_transient_recovery_and_terminal_errors(package, monkeypatch):
     assert result["status"] == "api_error" and len(result["attempts"]) == 1
 
 
+def test_thinking_flag_loads_presets_and_request_reasoning(package):
+    thinking = load_generation_config(True)
+    non_thinking = load_generation_config(False)
+    assert thinking.thinking and thinking.max_output_tokens == 8192 and thinking.timeout_seconds == 120
+    assert not non_thinking.thinking and non_thinking.max_output_tokens == 2048 and non_thinking.timeout_seconds == 60
+    assert make_request(package, thinking)["reasoning"] == {"enabled": True, "exclude": True}
+    assert make_request(package, non_thinking)["reasoning"] == {"enabled": False}
+    assert generate_answer(package, thinking=True)["request"]["reasoning"] == {"enabled": True, "exclude": True}
+    assert generate_answer(package, thinking=False)["request"]["reasoning"] == {"enabled": False}
+    with pytest.raises(ValueError, match="config or thinking"):
+        generate_answer(package, config=GenerationConfig(), thinking=False)
+    with pytest.raises(ValueError, match="thinking"):
+        load_generation_config("thinking")
+    with pytest.raises(ValueError, match="thinking"):
+        GenerationConfig(thinking=1).validate()
+
+
 def test_configured_model_and_request_budget(package):
     config = GenerationConfig(model="test/model", temperature=0.3)
     request = make_request(package, config)
     assert request["model"] == "test/model" and request["temperature"] == 0.3
+    assert request["reasoning"] == {"enabled": True, "exclude": True}
     payload = {**response(), "model": "test/model"}
     assert generate_answer(package, config=config, live=True, api_key="fixture",
                            transport=lambda *_: payload)["status"] == "answered"

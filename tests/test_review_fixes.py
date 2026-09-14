@@ -121,7 +121,7 @@ def test_resume_rejects_changed_request_and_legacy_identity():
     current = dict.fromkeys(RESUME_KEYS, "fixture")
     current["generation_identity"] = generation_identity(GenerationConfig())
     validate_resume(current, current)
-    for patch in ({"model": "another/model"}, {"temperature": 0.7}, {"max_output_tokens": 99}):
+    for patch in ({"model": "another/model"}, {"temperature": 0.7}, {"max_output_tokens": 99}, {"thinking": False}):
         changed = {**current, "generation_identity": generation_identity(GenerationConfig(**patch))}
         with pytest.raises(ValueError, match="generation_identity"):
             validate_resume(current, changed)

@@ -14,20 +14,31 @@ from mobile_rag.environment import openrouter_api_key
 
 # MODEL = "google/gemma-3-4b-it"
 MODEL = "qwen/qwen3.5-9b"
+THINKING = True
 PROMPT_VERSION = "evidence-answer/v6"
 PROMPT_PATH = Path(__file__).resolve().parent / "prompts" / "answer_generation.md"
 INSTRUCTIONS = PROMPT_PATH.read_text(encoding="utf-8").rstrip()
 PROMPT_SHA256 = hashlib.sha256(INSTRUCTIONS.encode("utf-8")).hexdigest()
 
 
+def _thinking_limits(thinking):
+    if thinking:
+        return 8192, 120
+    return 2048, 60
+
+
+_DEFAULT_MAX_OUTPUT_TOKENS, _DEFAULT_TIMEOUT_SECONDS = _thinking_limits(THINKING)
+
+
 @dataclass(frozen=True)
 class GenerationConfig:
-    max_output_tokens: int = 1024 * 2 * 2 * 2
-    timeout_seconds: int = 120
+    max_output_tokens: int = _DEFAULT_MAX_OUTPUT_TOKENS
+    timeout_seconds: int = _DEFAULT_TIMEOUT_SECONDS
     model: str = MODEL
     temperature: float = 0.0
     max_retries: int = 2
     retry_delay_seconds: float = 0.5
+    thinking: bool = THINKING
 
     def validate(self):
         for value in (self.max_output_tokens, self.timeout_seconds):
@@ -43,6 +54,25 @@ class GenerationConfig:
         if (type(self.retry_delay_seconds) not in (int, float) or not math.isfinite(self.retry_delay_seconds)
                 or not 0 <= self.retry_delay_seconds <= 10):
             raise ValueError("Retry delay must be between 0 and 10 seconds")
+        if type(self.thinking) is not bool:
+            raise ValueError("thinking must be True or False")
+
+    def reasoning(self):
+        """OpenRouter reasoning control; traces stay out of JSON content."""
+        payload = {"enabled": self.thinking}
+        if self.thinking:
+            payload["exclude"] = True
+        return payload
+
+
+def load_generation_config(thinking=None):
+    """Load token/timeout presets for thinking or non-thinking Qwen requests."""
+    if thinking is None:
+        thinking = THINKING
+    if type(thinking) is not bool:
+        raise ValueError("thinking must be True or False")
+    max_output_tokens, timeout_seconds = _thinking_limits(thinking)
+    return GenerationConfig(thinking=thinking, max_output_tokens=max_output_tokens, timeout_seconds=timeout_seconds)
 
 
 def generation_identity(config):
@@ -116,6 +146,7 @@ def render_request(question, evidence, config):
         "temperature": config.temperature,
         "max_tokens": config.max_output_tokens,
         "stream": False,
+        "reasoning": config.reasoning(),
         "response_format": {
             "type": "json_schema",
             "json_schema": {"name": "grounded_answer", "strict": True, "schema": schema},
@@ -158,8 +189,10 @@ def _failure(status, reason, **extra):
     return payload
 
 
-def generate_answer(package, *, config=None, api_key=None, live=False, transport=None):
-    config = config or GenerationConfig()
+def generate_answer(package, *, config=None, thinking=None, api_key=None, live=False, transport=None):
+    if config is not None and thinking is not None:
+        raise ValueError("Pass config or thinking, not both")
+    config = config or load_generation_config(thinking)
     config.validate()
     output = {
         "status": "invalid_context",
